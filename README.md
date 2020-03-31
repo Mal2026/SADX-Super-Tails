@@ -8,7 +8,7 @@ Note: You can change different settings as you pleasure: the number of the ring 
 Download
 --------
 
-Download the latest release from the [releases page](https://github.com/Sora-yx/SADX-Better-Tails-AI/releases)
+Download the latest release from the [releases page](https://github.com/Sora-yx/SADX-Super-Tails/releases)
 
 Installation
 ------------
