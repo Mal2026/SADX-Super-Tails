@@ -1,9 +1,9 @@
 # SADX Super Tails
 
 Here we go: The first proper Super Tails mod. While being in Super form, Tails is invincible, can fly faster, has a better air acceleration and most important part: he has his funny army of death. 
-That's right, the flickies are real and attack each enemy really fast to protect Miles. (They don't attack bosses for now.) 
+That's right, the flickies are real and attack each enemy really fast to protect Miles. (They don't attack bosses for now tho.) 
 
-Note: You can change different settings as you pleasure: the number of the ring needed for transformation, the music during super form, the sound effects etc.
+Note: You can change different settings as your pleasure: the number of rings needed for transformation, the music during super form, the sound effects etc.
 
 Download
 --------
