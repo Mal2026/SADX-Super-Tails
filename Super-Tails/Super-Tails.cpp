@@ -50,9 +50,12 @@ extern "C" {
 		//DisplayDebugStringFormatted(NJM_LOCATION(2, 1), "Current bird: %d", birdCount);
 
 		if (GameState == 15 && TimeThing)
+		{
 			SuperTails_OnFrames();
+			SubRings();
+		}
 
-		SubRings();
+		
 	}
 
 	__declspec(dllexport) ModInfo SADXModInfo = { ModLoaderVer };

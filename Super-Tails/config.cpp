@@ -186,7 +186,7 @@ void Transformation() {
 
 void SubRings() {
 
-	if (RingCout && isSuper && ControlEnabled && GameState == 15)
+	if (RingDrop && isSuper && ControlEnabled && GameState == 15)
 	{
 		++RingCout %= 60;
 
