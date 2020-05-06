@@ -132,9 +132,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="config.cpp" />
-    <ClCompile Include="Flickies.cpp" />
+    <ClCompile Include="Audio.cpp" />
     <ClCompile Include="Super-Tails.cpp" />
+    <ClCompile Include="Flickies.cpp" />
+    <ClCompile Include="mod.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="config.h" />

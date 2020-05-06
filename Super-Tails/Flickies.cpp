@@ -14,19 +14,16 @@ extern int delay;
 
 void CallFlicky() {
 
-	if (flicky1)
+	if (flicky1 || flicky2 || flicky3 || flicky4)
 		return;
 
-	ObjectMaster* play1 = GetCharacterObject(0);
 	LoadPVM("AMY_R", &AMY_TEXLIST); //Birdie texture
-
 
 	flicky1 = LoadObject((LoadObj)2, 3, LoadBird);
 	flicky2 = LoadObject((LoadObj)2, 3, LoadBird);
 	flicky3 = LoadObject((LoadObj)2, 3, LoadBird);
 	flicky4 = LoadObject((LoadObj)2, 3, LoadBird);
 	
-
 	return;
 }
 
@@ -41,6 +38,7 @@ void DeleteFlicky() {
 	flicky2 = nullptr;
 	flicky3 = nullptr;
 	flicky4 = nullptr;
+	njReleaseTexture(&AMY_TEXLIST);
 
 	return;
 }
