@@ -29,6 +29,7 @@ extern "C" {
 		delete config;
 
 		SuperTails_Init(path, helperFunctions);
+		Audio_Init(path, helperFunctions);
 	}
 
 

@@ -37,7 +37,7 @@ void RestoreMusic() {
 	}
 }
 
-void __cdecl SuperAudio_Init(const char* path, const HelperFunctions& helperFunctions)
+void __cdecl Audio_Init(const char* path, const HelperFunctions& helperFunctions)
 {
 	if (CurrentSFX != SADX_SFX) //dbz sound effect
 	{

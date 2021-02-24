@@ -62,13 +62,25 @@ void SubRings(int player) {
 
 void unSuper(int player) {
 
+	EntityData1* data = EntityData1Ptrs[player];
+	CharObj2* co2 = CharObj2Ptrs[player];
 	if (SuperSonicFlag)
 	{
 		TailsAnimData[30].AnimationSpeed = 0;
-		CharObj2Ptrs[player]->Upgrades &= ~Upgrades_SuperSonic; //unSuper
-		CharObj2Ptrs[player]->Powerups &= 0x100u; //Remove invincibility
-		CharObj2Ptrs[player]->PhysicsData = PhysicsArray[Characters_Tails];
-		CharObj2Ptrs[player]->PhysicsData.AirAccel = 0.03099999949;
+		co2->Upgrades &= ~Upgrades_SuperSonic;
+		co2->Powerups &= 0x100u;
+		data->Action = 1;
+		co2->IdleTime = 0;
+		co2->AnimationThing.Index = 1;
+
+		int status = data->Status;
+		bool v5 = (status & Status_Ball) == 0;
+
+		if (!v5)
+		{
+			data->Status = status & ~(Status_Attack | Status_Ball);
+		}
+		data->Status &= ~Status_OnPath;
 		DeleteFlicky();
 
 
@@ -95,6 +107,7 @@ void SetSuperMiles(CharObj2* co2, EntityData1* data1) {
 
 	PlayVoice(7001);
 	co2->Upgrades |= Upgrades_SuperSonic;
+	co2->Powerups |= Powerups_Invincibility;
 	v10 = (task*)LoadObject(LoadObj_Data1, 2, Sonic_SuperAura_Load);
 	if (v10)
 	{
@@ -108,6 +121,7 @@ void SetSuperMiles(CharObj2* co2, EntityData1* data1) {
 	//CallFlicky();
 	data1->Action = 1;
 	SuperSonicFlag = 1;
+
 	return;
 }
 
@@ -149,32 +163,37 @@ void SuperTails_Manager(ObjectMaster* obj) {
 		break;
 	case 3:
 		SubRings(player->CharIndex);
+		if (SuperSonicFlag || co2->Upgrades & Upgrades_SuperSonic) {
+
+			if (ControllerPointers[player->CharIndex]->PressedButtons & Buttons_Y)
+			{
+				if (player->Action == Flying || player->Action == Jumping || player->Action == Standing) {
+					unSuper(player->CharIndex);
+					data->Action = 4;
+
+				}
+			}
+		}
+		break;
+	case 4:
+		CheckThingButThenDeleteObject(obj);
 		break;
 	}
 
+
 }
-
-
-
-void SoftReset_R() {
-
-
-	return FUN_00412ad0();
-}
-
 
 void SuperTailsDelete(ObjectMaster* obj) {
 
 
 	unSuper(obj->Data1->CharIndex);
+
 	if (SuperTails_Main)
 		CheckThingButThenDeleteObject(SuperTails_Main);
 
 	SuperTails_Main = nullptr;
 
 }
-
-
 
 void Tails_Delete_r(ObjectMaster* obj) {
 
@@ -183,9 +202,6 @@ void Tails_Delete_r(ObjectMaster* obj) {
 	ObjectFunc(origin, Tails_Delete_t->Target());
 	origin(obj);
 }
-
-
-
 
 void SuperTails_PerformLightingThing() { //idk what it does exactly, but Sonic uses it for SS so...
 	if (SuperSonicFlag)
@@ -217,20 +233,19 @@ void Tails_Main_r(ObjectMaster* obj) {
 	CharObj2* co2 = CharObj2Ptrs[data->CharIndex];
 	EntityData2* data2 = EntityData2Ptrs[data->CharIndex];
 
+	if (GameState == 15 && !EV_MainThread_ptr && ControlEnabled) {
 
-	switch (data->Action) {
-	case 6:
-	case 15:
-		if (GameState == 15 && !EV_MainThread_ptr) {
-			if (ControllerPointers[data->CharIndex]->PressedButtons & Buttons_Y && ControlEnabled || isTailsAI(data) && CharObj2Ptrs[0]->Upgrades & Upgrades_SuperSonic)
-			{
+		if (ControllerPointers[data->CharIndex]->PressedButtons & Buttons_Y && Rings >= RingsNeeded || isTailsAI(data) && CharObj2Ptrs[0]->Upgrades & Upgrades_SuperSonic)
+		{
+			if (data->Action == Jumping || data->Action == Flying || data->Action >= BoardSlide && data->Action <= BoardJump || isTailsAI(data) && CharObj2Ptrs[0]->Upgrades & Upgrades_SuperSonic) {
+
 				if (!SuperTails_Main)
 					SuperTails_Main = LoadObject((LoadObj)2, 1, SuperTails_Manager);
 			}
 		}
-		break;
 	}
 }
+
 
 
 void SuperTailsCutscene_Delete() { //There is probably a nicer way to do this.
@@ -252,7 +267,6 @@ void SuperTailsCutscene_Delete() { //There is probably a nicer way to do this.
 
 	return DisableControl();
 }
-
 
 
 void LoadCharTextures_R() {
@@ -294,9 +308,6 @@ void __cdecl SuperTails_Init(const char* path, const HelperFunctions& helperFunc
 
 	Tails_Main_t = new Trampoline((int)Tails_Main, (int)Tails_Main + 0x7, Tails_Main_r);
 	Tails_Delete_t = new Trampoline((int)Tails_Delete, (int)Tails_Delete + 0x6, Tails_Delete_r);
-
-	SuperAudio_Init(path, helperFunctions);
-	WriteCall((void*)0x42ca4f, SoftReset_R); //Reset value and stuff properly when you Soft Reset and quit.	
 
 	//Textures init
 	WriteCall((void*)0x4c6316, NjSetTexture_Flicky);

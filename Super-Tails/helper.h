@@ -17,9 +17,8 @@ ObjectFunc(Bird_Main, 0x4c63f0);
 ObjectFunc(UpdateSetDataAndDelete, 0x46C150);
 VoidFunc(FUN_00412ad0, 0x412ad0);
 FunctionPointer(void, FUN_004314d0, (int value), 0x4314d0);
-DataPointer(int, CurrentCutscene, 0x3b2c560);
 
-void __cdecl SuperAudio_Init(const char* path, const HelperFunctions& helperFunctions);
+void __cdecl Audio_Init(const char* path, const HelperFunctions& helperFunctions);
 void __cdecl SuperTails_Init(const char* path, const HelperFunctions& helperFunctions);
 
 void SuperTailsDelete(ObjectMaster* obj);
@@ -27,7 +26,6 @@ void SuperTailsDelete(ObjectMaster* obj);
 void unSuper(int player);
 void CallFlicky();
 void DeleteFlicky();
-void SoftReset_R();
 void RestoreMusic();
 void FlickyAction_Main_r(ObjectMaster* obj);
 void Play_SuperTailsMusic();
@@ -50,5 +48,14 @@ enum SoundEffect {
 
 	SADX_SFX,
 	DBZ_SFX
+};
+
+enum TailsActions {
+	Standing = 1,
+	Jumping = 6,
+	Flying = 15,
+	BoardSlide = 48,
+	BoardJump = 52
+
 };
 
