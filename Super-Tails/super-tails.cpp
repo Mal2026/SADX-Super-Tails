@@ -22,6 +22,7 @@ NJS_TEXNAME Flicky_DX[31];
 NJS_TEXLIST FlickyDX_TEXLIST = { arrayptrandlength(Flicky_DX) };
 NJS_TEXLIST FlickyDC_TEXLIST = { arrayptrandlength(Flicky_DC) };
 bool isDCCharUsed = false;
+bool isSuperTails = false;
 
 bool isTailsCurChar() {
 
@@ -42,10 +43,17 @@ bool isTailsAI(EntityData1* data1) {
 	return false;
 }
 
+bool isSuperSonic(int player) {
+
+	if (player == Characters_Sonic && CharObj2Ptrs[player]->Upgrades & Upgrades_SuperSonic)
+		return true;
+
+	return false;
+}
 
 void SubRings(int player) {
 
-	if (!RingDrop || EntityData1Ptrs[player]->CharID != Characters_Tails || !SuperSonicFlag || isTailsAI(EntityData1Ptrs[player]) || !ControlEnabled || !TimeThing || GameState != 15)
+	if (!RingDrop || EntityData1Ptrs[player]->CharID != Characters_Tails || !isSuperTails || isTailsAI(EntityData1Ptrs[player]) || !ControlEnabled || !TimeThing || GameState != 15)
 		return;
 
 	if (FrameCounterUnpaused % 60 == 0 && Rings > 0) {
@@ -64,7 +72,7 @@ void unSuper(int player) {
 
 	EntityData1* data = EntityData1Ptrs[player];
 	CharObj2* co2 = CharObj2Ptrs[player];
-	if (SuperSonicFlag)
+	if (isSuperTails)
 	{
 		TailsAnimData[30].AnimationSpeed = 0;
 		co2->Upgrades &= ~Upgrades_SuperSonic;
@@ -92,7 +100,7 @@ void unSuper(int player) {
 			RestoreMusic();
 		}
 
-		SuperSonicFlag = 0;
+		isSuperTails = false;
 	}
 
 	return;
@@ -120,7 +128,7 @@ void SetSuperMiles(CharObj2* co2, EntityData1* data1) {
 	}
 	//CallFlicky();
 	data1->Action = 1;
-	SuperSonicFlag = 1;
+	isSuperTails = true;
 
 	return;
 }
@@ -151,26 +159,24 @@ void SuperTails_Manager(ObjectMaster* obj) {
 		break;
 	case 2:
 		SetSuperMiles(co2, player);
-		if (!isTailsAI(data)) {
+		if (!isTailsAI(player)) {
 			if (CurrentSuperMusic != None && CurrentSong != MusicIDs_sprsonic)
 			{
 				ActualSong = LastSong;
 				Play_SuperTailsMusic();
 			}
 		}
-
 		data->Action = 3;
 		break;
 	case 3:
 		SubRings(player->CharIndex);
-		if (SuperSonicFlag || co2->Upgrades & Upgrades_SuperSonic) {
+		if (isSuperTails || co2->Upgrades & Upgrades_SuperSonic) {
 
-			if (ControllerPointers[player->CharIndex]->PressedButtons & Buttons_Y)
+			if (ControllerPointers[player->CharIndex]->PressedButtons & Buttons_Y || isTailsAI(player) && !isSuperSonic(0))
 			{
 				if (player->Action == Flying || player->Action == Jumping || player->Action == Standing) {
 					unSuper(player->CharIndex);
 					data->Action = 4;
-
 				}
 			}
 		}
@@ -184,7 +190,6 @@ void SuperTails_Manager(ObjectMaster* obj) {
 }
 
 void SuperTailsDelete(ObjectMaster* obj) {
-
 
 	unSuper(obj->Data1->CharIndex);
 
@@ -204,7 +209,7 @@ void Tails_Delete_r(ObjectMaster* obj) {
 }
 
 void SuperTails_PerformLightingThing() { //idk what it does exactly, but Sonic uses it for SS so...
-	if (SuperSonicFlag)
+	if (isSuperTails)
 		Direct3D_PerformLighting(4);
 	else
 		Direct3D_PerformLighting(2);
@@ -214,7 +219,7 @@ void SuperTails_PerformLightingThing() { //idk what it does exactly, but Sonic u
 Sint32 __cdecl setSuperTailsTexture(NJS_TEXLIST* texlist)
 {
 
-	if (SuperSonicFlag) {
+	if (isSuperTails) {
 		if (isDCCharUsed)
 			texlist = &SuperMilesDC_TEXLIST;
 		else
@@ -235,12 +240,14 @@ void Tails_Main_r(ObjectMaster* obj) {
 
 	if (GameState == 15 && !EV_MainThread_ptr && ControlEnabled) {
 
-		if (ControllerPointers[data->CharIndex]->PressedButtons & Buttons_Y && Rings >= RingsNeeded || isTailsAI(data) && CharObj2Ptrs[0]->Upgrades & Upgrades_SuperSonic)
+		if (ControllerPointers[data->CharIndex]->PressedButtons & Buttons_Y && Rings >= RingsNeeded || isTailsAI(data) && isSuperSonic(0))
 		{
-			if (data->Action == Jumping || data->Action == Flying || data->Action >= BoardSlide && data->Action <= BoardJump || isTailsAI(data) && CharObj2Ptrs[0]->Upgrades & Upgrades_SuperSonic) {
+			if (data->Action == Jumping || data->Action == Flying || data->Action >= BoardSlide && data->Action <= BoardJump || isTailsAI(data) && isSuperSonic(0)) {
 
-				if (!SuperTails_Main)
+				if (!SuperTails_Main) {
 					SuperTails_Main = LoadObject((LoadObj)2, 1, SuperTails_Manager);
+					SuperTails_Main->Data1->CharIndex = data->CharIndex;
+				}
 			}
 		}
 	}
@@ -253,7 +260,7 @@ void SuperTailsCutscene_Delete() { //There is probably a nicer way to do this.
 	ObjectMaster* P1 = GetCharacterObject(0);
 	if (GameState == 15)
 	{
-		if (SuperSonicFlag && (isTailsCurChar()) || CurrentCharacter == Characters_Tails)
+		if (isSuperTails && (isTailsCurChar()) || CurrentCharacter == Characters_Tails)
 		{
 			TailsAnimData[30].AnimationSpeed = 0;
 			CharObj2Ptrs[0]->Upgrades &= ~Upgrades_SuperSonic; //unSuper
@@ -261,7 +268,7 @@ void SuperTailsCutscene_Delete() { //There is probably a nicer way to do this.
 			CharObj2Ptrs[0]->PhysicsData = PhysicsArray[Characters_Tails];
 			CharObj2Ptrs[0]->PhysicsData.AirAccel = 0.03099999949;
 			DeleteFlicky();
-			SuperSonicFlag = 0;
+			isSuperTails = false;
 		}
 	}
 
@@ -271,18 +278,15 @@ void SuperTailsCutscene_Delete() { //There is probably a nicer way to do this.
 
 void LoadCharTextures_R() {
 
-	if (CurrentCharacter == Characters_Tails) {
+	LoadPVM("SUPERSONIC", &SUPERSONIC_TEXLIST);
 
-		LoadPVM("SUPERSONIC", &SUPERSONIC_TEXLIST);
-
-		if (isDCCharUsed) {
-			LoadPVM("SUPERMILES", &SuperMilesDC_TEXLIST);
-			LoadPVM("AMY_R", &FlickyDC_TEXLIST);
-		}
-		else {
-			LoadPVM("SUPERMILES", &SuperMiles_TEXLIST);
-			LoadPVM("AMY_R", &FlickyDX_TEXLIST);
-		}
+	if (isDCCharUsed) {
+		LoadPVM("SUPERMILES", &SuperMilesDC_TEXLIST);
+		LoadPVM("AMY_R", &FlickyDC_TEXLIST);
+	}
+	else {
+		LoadPVM("SUPERMILES", &SuperMiles_TEXLIST);
+		LoadPVM("AMY_R", &FlickyDX_TEXLIST);
 	}
 
 	ResetGravity();
