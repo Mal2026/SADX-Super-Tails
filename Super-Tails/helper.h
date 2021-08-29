@@ -42,7 +42,7 @@ enum SuperTailsMusic {
 
 enum SoundEffect {
 
-	SADX_SFX,
+	SADX_SFX = 1,
 	DBZ_SFX
 };
 

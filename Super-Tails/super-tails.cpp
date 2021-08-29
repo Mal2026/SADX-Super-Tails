@@ -61,7 +61,7 @@ void unSuper(int player) {
 
 		if (GameState == 15 && ControlEnabled)
 		{
-			if (CurrentSFX)
+			if (CurrentSFX == DBZ_SFX)
 				PlayVoice(7002);
 
 			RestoreMusic();
@@ -82,7 +82,7 @@ void SetSuperMiles(CharObj2* co2, EntityData1* data1) {
 	taskwk* taskw = (taskwk*)data1;
 
 
-	if (IsIngame())
+	if (IsIngame() && CurrentSFX != None)
 		PlayVoice(7001);
 
 	co2->Upgrades |= Upgrades_SuperSonic;
@@ -168,6 +168,7 @@ void SuperMiles_Manager(ObjectMaster* obj) {
 	EntityData1* player = EntityData1Ptrs[obj->Data1->CharIndex];
 	EntityData2* player2 = EntityData2Ptrs[obj->Data1->CharIndex];
 	CharObj2* co2 = CharObj2Ptrs[player->CharIndex];
+	int timer = 30;
 
 	if (!player)
 		return;
@@ -194,7 +195,11 @@ void SuperMiles_Manager(ObjectMaster* obj) {
 		data->Action++;
 		break;
 	case superTailsWait:
-		if (++data->Index == 30)
+
+		if (AlwaysSuperMiles)
+			timer = 10;
+
+		if (++data->Index == timer)
 		{
 			data->Action++;
 		}
@@ -241,6 +246,7 @@ void SuperMiles_Manager(ObjectMaster* obj) {
 void SuperTailsDelete(ObjectMaster* obj) {
 
 	unSuper(obj->Data1->CharIndex);
+	MusicList[MusicIDs_sprsonic].Name = "sprsonic";
 
 	if (SuperMiles_ObjManager)
 		CheckThingButThenDeleteObject(SuperMiles_ObjManager);

@@ -7,7 +7,7 @@
 
 const char* SuperTailsMusic_Array[7] = {
 	"none", "sonic2", "sonic3", "s&k",
-	"sadx", "sa2", "mania"
+	"sprsonic", "sa2", "mania"
 };
 
 const char* GetSuperTails_Music() {
@@ -39,6 +39,9 @@ void RestoreMusic() {
 
 void __cdecl Audio_Init(const char* path, const HelperFunctions& helperFunctions)
 {
+	if (CurrentSFX == None)
+		return;
+
 	if (CurrentSFX != SADX_SFX) //dbz sound effect
 	{
 		AddSound1("7001", "LoadAura");

@@ -1,7 +1,7 @@
 #include "stdafx.h"
 
 int CurrentSuperMusic = Random;
-int CurrentSFX = 0;
+int CurrentSFX = SADX_SFX;
 bool AnimationTransfo = true;
 bool RemoveLimitations = false;
 bool AlwaysSuperMiles = false;
@@ -21,11 +21,12 @@ extern "C" {
 		//Ini file configuration
 
 		const IniFile* config = new IniFile(std::string(path) + "\\config.ini");
-		CurrentSuperMusic = config->getInt("General", "CurrentSuperMusic", Random);
-		CurrentSFX = config->getInt("General", "GetVoice", SADX_SFX);
 		AnimationTransfo = config->getBool("General", "AnimationTransfo", true);
 		RemoveLimitations = config->getBool("General", "RemoveLimitations", false);
 		AlwaysSuperMiles = config->getBool("General", "AlwaysSuperMiles", false);
+
+		CurrentSuperMusic = config->getInt("Audio", "CurrentSuperMusic", Random);
+		CurrentSFX = config->getInt("Audio", "GetVoice", SADX_SFX);
 		delete config;
 
 		if (AlwaysSuperMiles)
