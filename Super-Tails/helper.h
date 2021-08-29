@@ -2,12 +2,12 @@
 
 extern bool isDCCharUsed;
 extern int CurrentSuperMusic;
-extern int RingsNeeded;
+extern bool RemoveLimitations;
 extern int CurrentSFX;
 extern bool AnimationTransfo;
-extern bool RingDrop;
 extern int ActualSong;
 extern bool isSuperTails;
+extern bool AlwaysSuperMiles;
 
 FunctionPointer(ObjectMaster*, CheckLoadBird, (), 0x4C6820);
 ObjectFunc(LoadBird, 0x4c6790);
@@ -25,9 +25,7 @@ void SuperTailsDelete(ObjectMaster* obj);
 void unSuper(int player);
 void Call_Flickies(int player);
 void RestoreMusic();
-void FlickyAction_Main_r(ObjectMaster* obj);
 void Play_SuperTailsMusic();
-void NjSetTexture_Flicky();
 bool isTailsCurChar();
 
 enum SuperTailsMusic {

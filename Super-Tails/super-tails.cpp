@@ -3,7 +3,7 @@
 
 int ActualSong = 0;
 
-ObjectMaster* SuperTails_Main;
+ObjectMaster* SuperMiles_ObjManager;
 Trampoline* Tails_Main_t;
 Trampoline* Miles_CheckNextActions_t;
 Trampoline* Tails_Delete_t;
@@ -13,10 +13,9 @@ HelperFunctions help;
 bool isDCCharUsed = false;
 bool isSuperTails = false;
 
-
 void SubRings(int player) {
 
-	if (!RingDrop || EntityData1Ptrs[player]->CharID != Characters_Tails || !isSuperTails || isTailsAI(EntityData1Ptrs[player]) || !ControlEnabled || !TimeThing || GameState != 15)
+	if (RemoveLimitations || AlwaysSuperMiles || EntityData1Ptrs[player]->CharID != Characters_Tails || !isSuperTails || isTailsAI(EntityData1Ptrs[player]) || !ControlEnabled || !TimeThing || GameState != 15)
 		return;
 
 	if (FrameCounterUnpaused % 60 == 0 && Rings > 0) {
@@ -33,8 +32,14 @@ void SubRings(int player) {
 
 void unSuper(int player) {
 
+	if (AlwaysSuperMiles)
+		return;
+
+
 	EntityData1* data = EntityData1Ptrs[player];
 	CharObj2* co2 = CharObj2Ptrs[player];
+
+
 	if (isSuperTails)
 	{
 		TailsAnimData[30].AnimationSpeed = 0;
@@ -43,6 +48,7 @@ void unSuper(int player) {
 		data->Action = 1;
 		co2->IdleTime = 0;
 		co2->AnimationThing.Index = 1;
+		co2->PhysicsData = PhysicsArray[Characters_Tails];
 
 		int status = data->Status;
 		bool v5 = (status & Status_Ball) == 0;
@@ -67,35 +73,6 @@ void unSuper(int player) {
 	return;
 }
 
-void EffBarrierPosSet(EntityData1* a1, EntityData1* Player)
-{
-	float v3; // eax
-	Angle v4; // eax
-	Angle v5; // eax
-	NJS_VECTOR a2a; // [esp+4h] [ebp-Ch] BYREF
-
-	v3 = Player->Scale.x;
-	a2a.z = 0.0;
-	a2a.y = 0.0;
-	a2a.x = 0.0;
-	a1->Scale.x = v3;
-	a1->Scale.y = GetCharObj2(0)->PhysicsData.CollisionSize * a1->Scale.x * 0.60000002;
-	njPushMatrix(_nj_unit_matrix_);
-	njTranslateV(0, &Player->Position);
-	v4 = Player->Rotation.z;
-	if (v4)
-	{
-		njRotateZ(0, (unsigned __int16)v4);
-	}
-	v5 = Player->Rotation.x;
-	if (v5)
-	{
-		njRotateX(0, (unsigned __int16)v5);
-	}
-	njTranslate(0, 0.0, a1->Scale.y, 0.0);
-	njCalcPoint(0, &a2a, &a1->Position);
-	njPopMatrix(1u);
-}
 
 
 void SetSuperMiles(CharObj2* co2, EntityData1* data1) {
@@ -104,7 +81,10 @@ void SetSuperMiles(CharObj2* co2, EntityData1* data1) {
 	task* v11;
 	taskwk* taskw = (taskwk*)data1;
 
-	PlayVoice(7001);
+
+	if (IsIngame())
+		PlayVoice(7001);
+
 	co2->Upgrades |= Upgrades_SuperSonic;
 	co2->Powerups |= Powerups_Invincibility;
 	v10 = (task*)LoadObject(LoadObj_Data1, 2, Sonic_SuperAura_Load);
@@ -112,7 +92,7 @@ void SetSuperMiles(CharObj2* co2, EntityData1* data1) {
 	{
 		v10->twp->counter.b[0] = taskw->counter.b[0];
 	}
-	v11 = (task*)LoadObject(LoadObj_UnknownB, 2, Sonic_SuperPhysics_Load);
+	v11 = (task*)LoadObject(LoadObj_UnknownB, 2, Miles_SuperPhysics_Load);
 	if (v11)
 	{
 		v11->awp->work.ub[0] = taskw->counter.b[0];
@@ -157,73 +137,115 @@ void MilesDoCollisionAttackStuff(EntityData1* data, motionwk2* data2, CharObj2* 
 	}
 }
 
-void SuperTails_Manager(ObjectMaster* obj) {
+bool CheckPlayer_Input(int playerID) {
+
+	EntityData1* data = EntityData1Ptrs[playerID];
+
+	if (ControllerPointers[data->CharIndex]->PressedButtons & Buttons_Y && (Rings >= 50 || RemoveLimitations) || isTailsAI(data) && isPlayerOnSuperForm(0))
+	{
+		if (data->Action == Jumping || data->Action == Flying || data->Action >= BoardSlide && data->Action <= BoardJump || isTailsAI(data) && isPlayerOnSuperForm(0)) {
+
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void SuperMiles_PlayTransfoAnimation(EntityData1* player) {
+
+	if (AlwaysSuperMiles || !AnimationTransfo)
+		return;
+
+	TailsAnimData[30].AnimationSpeed = 0.8f; //increase speed animation
+	player->Action = 75;
+	CharObj2Ptrs[player->CharIndex]->AnimationThing.Index = 30;
+}
+
+void SuperMiles_Manager(ObjectMaster* obj) {
+
 	EntityData1* data = obj->Data1;
 	EntityData1* player = EntityData1Ptrs[obj->Data1->CharIndex];
 	EntityData2* player2 = EntityData2Ptrs[obj->Data1->CharIndex];
 	CharObj2* co2 = CharObj2Ptrs[player->CharIndex];
 
+	if (!player)
+		return;
+
 	switch (data->Action) {
-	case 0:
-		data->Index = 0;
-		TailsAnimData[30].AnimationSpeed = 0.8f; //increase speed animation
-		player->Status &= ~(Status_OnPath | Status_Attack | Status_Ball);
+
+	case superTailsSetTask:
 		obj->DeleteSub = SuperTailsDelete;
-		player->Action = 75;
-		co2->Powerups |= Powerups_Invincibility;
-		CharObj2Ptrs[player->CharIndex]->AnimationThing.Index = 30;
-		data->Action = 1;
+		data->Action++;
+	case playerInputCheck:
+
+		if (!IsIngame() || EV_MainThread_ptr || !AlwaysSuperMiles && !ControlEnabled)
+			return;
+
+		if (CheckPlayer_Input(data->CharIndex) || AlwaysSuperMiles)
+			data->Action++;
+
 		break;
-	case 1:
+	case superTailsInit:
+		data->Index = 0;
+		player->Status &= ~(Status_OnPath | Status_Attack | Status_Ball);
+		co2->Powerups |= Powerups_Invincibility;
+		SuperMiles_PlayTransfoAnimation(player);
+		data->Action++;
+		break;
+	case superTailsWait:
 		if (++data->Index == 30)
 		{
-			data->Action = 2;
+			data->Action++;
 		}
 		break;
-	case 2:
+	case superTailsTransfo:
 
 		SetSuperMiles(co2, player);
-			
+
 		if (!isTailsAI(player)) {
-			if (CurrentSuperMusic != None && CurrentSong != MusicIDs_sprsonic) 
+			if (CurrentSuperMusic != None && CurrentSong != MusicIDs_sprsonic)
 			{
 				ActualSong = LastSong;
 				Play_SuperTailsMusic();
 			}
 		}
-		data->Action = 3;
+
+		if (AlwaysSuperMiles)
+			data->Action = 6;
+		else
+			data->Action++;
+
 		break;
-	case 3:
+	case superTailsOnFrames:
 		SubRings(player->CharIndex);
 
 		//Tails_LoadAttackEffect(player2, co2, player);
 		if (isSuperTails || co2->Upgrades & Upgrades_SuperSonic) {
 
-			if (ControllerPointers[player->CharIndex]->PressedButtons & Buttons_Y || isTailsAI(player) && !isSuperSonic(0))
+			if (ControllerPointers[player->CharIndex]->PressedButtons & Buttons_Y || isTailsAI(player) && !isPlayerOnSuperForm(0))
 			{
-				if (player->Action == Flying || player->Action == Jumping || player->Action == Standing || isTailsAI(player) && !isSuperSonic(0)) {
+				if (player->Action == Flying || player->Action == Jumping || player->Action == Standing || isTailsAI(player) && !isPlayerOnSuperForm(0)) {
 					unSuper(player->CharIndex);
-					data->Action = 4;
+					data->Action = playerInputCheck;
 				}
 			}
 		}
 		break;
-	case 4:
+	default:
 		CheckThingButThenDeleteObject(obj);
 		break;
 	}
-
-
 }
 
 void SuperTailsDelete(ObjectMaster* obj) {
 
 	unSuper(obj->Data1->CharIndex);
 
-	if (SuperTails_Main)
-		CheckThingButThenDeleteObject(SuperTails_Main);
+	if (SuperMiles_ObjManager)
+		CheckThingButThenDeleteObject(SuperMiles_ObjManager);
 
-	SuperTails_Main = nullptr;
+	SuperMiles_ObjManager = nullptr;
 
 }
 
@@ -258,26 +280,22 @@ Sint32 __cdecl setSuperTailsTexture(NJS_TEXLIST* texlist)
 
 void Tails_Main_r(ObjectMaster* obj) {
 
-	ObjectFunc(origin, Tails_Main_t->Target());
-	origin(obj);
-
 	EntityData1* data = obj->Data1;
 	CharObj2* co2 = CharObj2Ptrs[data->CharIndex];
 	EntityData2* data2 = EntityData2Ptrs[data->CharIndex];
 
-	if (GameState == 15 && !EV_MainThread_ptr && ControlEnabled) {
 
-		if (ControllerPointers[data->CharIndex]->PressedButtons & Buttons_Y && Rings >= RingsNeeded || isTailsAI(data) && isSuperSonic(0))
-		{
-			if (data->Action == Jumping || data->Action == Flying || data->Action >= BoardSlide && data->Action <= BoardJump || isTailsAI(data) && isSuperSonic(0)) {
-
-				if (!SuperTails_Main) {
-					SuperTails_Main = LoadObject((LoadObj)2, 1, SuperTails_Manager);
-					SuperTails_Main->Data1->CharIndex = data->CharIndex;
-				}
-			}
+	if (data->Action == 0) {
+		if (!SuperMiles_ObjManager) {
+			SuperMiles_ObjManager = LoadObject((LoadObj)2, 1, SuperMiles_Manager);
+			SuperMiles_ObjManager->Data1->CharIndex = data->CharIndex;
 		}
 	}
+
+	ObjectFunc(origin, Tails_Main_t->Target());
+	origin(obj);
+
+
 }
 
 
@@ -293,7 +311,6 @@ void SuperTailsCutscene_Delete() { //There is probably a nicer way to do this.
 			CharObj2Ptrs[0]->Upgrades &= ~Upgrades_SuperSonic; //unSuper
 			CharObj2Ptrs[0]->Powerups &= 0x100u;
 			CharObj2Ptrs[0]->PhysicsData = PhysicsArray[Characters_Tails];
-			CharObj2Ptrs[0]->PhysicsData.AirAccel = 0.03099999949;
 			isSuperTails = false;
 		}
 	}
@@ -336,4 +353,5 @@ void __cdecl SuperTails_Init(const char* path, const HelperFunctions& helperFunc
 
 	//Delete Super Tails properly when you die, restart, game over or before a cutscene start.
 	WriteCall((void*)0x413728, SuperTailsCutscene_Delete);
+
 }

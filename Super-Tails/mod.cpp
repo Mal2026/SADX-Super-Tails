@@ -3,8 +3,8 @@
 int CurrentSuperMusic = Random;
 int CurrentSFX = 0;
 bool AnimationTransfo = true;
-int RingsNeeded = 50;
-bool RingDrop = true;
+bool RemoveLimitations = false;
+bool AlwaysSuperMiles = false;
 
 extern "C" {
 
@@ -24,14 +24,15 @@ extern "C" {
 		CurrentSuperMusic = config->getInt("General", "CurrentSuperMusic", Random);
 		CurrentSFX = config->getInt("General", "GetVoice", SADX_SFX);
 		AnimationTransfo = config->getBool("General", "AnimationTransfo", true);
-		RingsNeeded = config->getInt("General", "RingsNeeded", 50);
-		RingDrop = config->getBool("General", "RingDrop", true);
+		RemoveLimitations = config->getBool("General", "RemoveLimitations", false);
+		AlwaysSuperMiles = config->getBool("General", "AlwaysSuperMiles", false);
 		delete config;
+
+		if (AlwaysSuperMiles)
+			RemoveLimitations = true;
 
 		SuperTails_Init(path, helperFunctions);
 		Audio_Init(path, helperFunctions);
-
-		WriteData<5>((int*)0x4c630c, 0x90);
 	}
 
 

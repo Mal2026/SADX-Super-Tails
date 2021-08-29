@@ -150,6 +150,7 @@
     <ClCompile Include="audio.cpp" />
     <ClCompile Include="flickies.cpp" />
     <ClCompile Include="mod.cpp" />
+    <ClCompile Include="physics.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="super-tails.cpp" />
     <ClCompile Include="util.cpp" />

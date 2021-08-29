@@ -21,9 +21,9 @@ bool isTailsAI(EntityData1* data1) {
 	return false;
 }
 
-bool isSuperSonic(int player) {
+bool isPlayerOnSuperForm(int player) {
 
-	if (player == Characters_Sonic && CharObj2Ptrs[player]->Upgrades & Upgrades_SuperSonic)
+	if (CharObj2Ptrs[player]->Upgrades & Upgrades_SuperSonic)
 		return true;
 
 	return false;

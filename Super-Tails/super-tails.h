@@ -1,5 +1,14 @@
 #pragma once
 
+enum SuperTailsM {
+	superTailsSetTask,
+	playerInputCheck,
+	superTailsInit,
+	superTailsWait,
+	superTailsTransfo,
+	superTailsOnFrames,
+};
+
 
 NJS_TEXNAME SUPERMILES_DC[25];
 NJS_TEXNAME SUPERMILES_DX[16];
@@ -22,3 +31,5 @@ PVMEntry superTails_DXTex[] = {
 	{"flickyTex", &Flicky_TEXLIST  },
 	{ "SUPERSONIC", &SUPERSONIC_TEXLIST},
 };
+
+void __cdecl Miles_SuperPhysics_Load(ObjectMaster* obj);

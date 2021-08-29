@@ -5,4 +5,14 @@
 
 bool isTailsCurChar();
 bool isTailsAI(EntityData1* data1);
-bool isSuperSonic(int player);
+bool isPlayerOnSuperForm(int player);
+
+#pragma pack(push, 1)
+struct ObjUnknownB
+{
+	int Time;
+	int Index;
+	int Mode;
+	int field_C;
+};
+#pragma pack(pop)

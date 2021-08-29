@@ -7,14 +7,11 @@ ObjectMaster* flicky2;
 ObjectMaster* flicky3;
 ObjectMaster* flicky4;
 
-
 ObjectMaster* flicky[4] = { flicky1, flicky2, flicky3, flicky4 };
 
 NJS_VECTOR	bombpos;	
 float		bombsize;
 extern int delay;
-
-
 int randFlicky = 0;
 
 void Flicky_Delete(ObjectMaster* obj) {
@@ -24,11 +21,8 @@ void Flicky_Delete(ObjectMaster* obj) {
 	}
 }
 
-
 extern NJS_TEXLIST Flicky_TEXLIST;
 
-
-FunctionPointer(void, MJoinVertexes, (NJS_OBJECT* Object, NJS_MOTION* Motion, float a3, int a4), 0x43A090);
 
 void __cdecl Flicky_Display(ObjectMaster* obj) {
 	EntityData1* data = obj->Data1;
@@ -45,7 +39,7 @@ void __cdecl Flicky_Display(ObjectMaster* obj) {
 	njTranslateV(0, &data->Position);
 	njRotateY(0, data->Rotation.y);
 	NJS_ACTION Action = { obj->Data1->Object, WingAnim.motion};
-	njAction_Queue(&Action, LevelFrameCount % WingAnim.motion->nbFrame, QueuedModelFlagsB_EnableZWrite);
+	njAction_Queue(&Action, FrameCounterUnpaused % WingAnim.motion->nbFrame, QueuedModelFlagsB_EnableZWrite);
 	njPopMatrixEx();
 
 	ClampGlobalColorThing_Thing();
