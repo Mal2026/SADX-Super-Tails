@@ -30,6 +30,8 @@ extern "C" {
 
 		SuperTails_Init(path, helperFunctions);
 		Audio_Init(path, helperFunctions);
+
+		WriteData<5>((int*)0x4c630c, 0x90);
 	}
 
 

@@ -14,5 +14,6 @@
 #include "IniFile.hpp"
 #include "LandTableInfo.h"
 #include "Trampoline.h"
+#include "util.h"
 #include "helper.h"
 

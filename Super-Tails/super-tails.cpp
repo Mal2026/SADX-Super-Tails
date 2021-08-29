@@ -1,6 +1,5 @@
 #include "stdafx.h"
-
-#define ReplacePVM(SM, SMR) helperFunctions.ReplaceFile("system\\" SM ".pvm", "system\\textures\\" SMR ".pvmx")
+#include "super-tails.h"
 
 int ActualSong = 0;
 
@@ -10,46 +9,10 @@ Trampoline* Miles_CheckNextActions_t;
 Trampoline* Tails_Delete_t;
 
 HelperFunctions help;
-NJS_TEXNAME SUPERMILES_DC[25];
-NJS_TEXNAME SUPERMILES_DX[16];
 
-NJS_TEXLIST SuperMilesDC_TEXLIST = { arrayptrandlength(SUPERMILES_DC) };
-NJS_TEXLIST SuperMiles_TEXLIST = { arrayptrandlength(SUPERMILES_DX) };
-
-NJS_TEXNAME Flicky_DC[53];
-NJS_TEXNAME Flicky_DX[31];
-
-NJS_TEXLIST FlickyDX_TEXLIST = { arrayptrandlength(Flicky_DX) };
-NJS_TEXLIST FlickyDC_TEXLIST = { arrayptrandlength(Flicky_DC) };
 bool isDCCharUsed = false;
 bool isSuperTails = false;
 
-bool isTailsCurChar() {
-
-	EntityData1* P1 = EntityData1Ptrs[0];
-	EntityData1* AI = EntityData1Ptrs[1];
-
-	if (P1 != nullptr && P1->CharID == Characters_Tails || AI != nullptr && AI->CharID == Characters_Tails)
-		return true;
-
-	return false;
-}
-
-bool isTailsAI(EntityData1* data1) {
-
-	if (TailsAI_ptr != nullptr && data1->CharIndex == 1 && data1->CharID == Characters_Tails)
-		return true;
-
-	return false;
-}
-
-bool isSuperSonic(int player) {
-
-	if (player == Characters_Sonic && CharObj2Ptrs[player]->Upgrades & Upgrades_SuperSonic)
-		return true;
-
-	return false;
-}
 
 void SubRings(int player) {
 
@@ -89,8 +52,6 @@ void unSuper(int player) {
 			data->Status = status & ~(Status_Attack | Status_Ball);
 		}
 		data->Status &= ~Status_OnPath;
-		DeleteFlicky();
-
 
 		if (GameState == 15 && ControlEnabled)
 		{
@@ -104,6 +65,36 @@ void unSuper(int player) {
 	}
 
 	return;
+}
+
+void EffBarrierPosSet(EntityData1* a1, EntityData1* Player)
+{
+	float v3; // eax
+	Angle v4; // eax
+	Angle v5; // eax
+	NJS_VECTOR a2a; // [esp+4h] [ebp-Ch] BYREF
+
+	v3 = Player->Scale.x;
+	a2a.z = 0.0;
+	a2a.y = 0.0;
+	a2a.x = 0.0;
+	a1->Scale.x = v3;
+	a1->Scale.y = GetCharObj2(0)->PhysicsData.CollisionSize * a1->Scale.x * 0.60000002;
+	njPushMatrix(_nj_unit_matrix_);
+	njTranslateV(0, &Player->Position);
+	v4 = Player->Rotation.z;
+	if (v4)
+	{
+		njRotateZ(0, (unsigned __int16)v4);
+	}
+	v5 = Player->Rotation.x;
+	if (v5)
+	{
+		njRotateX(0, (unsigned __int16)v5);
+	}
+	njTranslate(0, 0.0, a1->Scale.y, 0.0);
+	njCalcPoint(0, &a2a, &a1->Position);
+	njPopMatrix(1u);
 }
 
 
@@ -126,18 +117,50 @@ void SetSuperMiles(CharObj2* co2, EntityData1* data1) {
 	{
 		v11->awp->work.ub[0] = taskw->counter.b[0];
 	}
-	//CallFlicky();
+	Call_Flickies(data1->CharIndex);
 	data1->Action = 1;
 	isSuperTails = true;
 
 	return;
 }
 
+void MilesDoCollisionAttackStuff(EntityData1* data, motionwk2* data2, CharObj2* a2) {
 
+	Angle v3; // eax
+	Angle v4; // eax
+	Angle v5; // eax
+	ObjectMaster* v6; // eax
+	ObjectMaster* v7; // eax
+	ObjectMaster* v8; // eax
+	ObjectMaster* v9; // eax
+	float v10; // eax
+	int v11; // ecx
+	float v12; // edx
+	float v13; // eax
+	float v14; // ecx
+	float v15; // [esp+0h] [ebp-30h]
+	NJS_VECTOR v16; // [esp+0h] [ebp-30h]
+	float v17; // [esp+4h] [ebp-2Ch]
+	int v18; // [esp+8h] [ebp-28h]
+	Rotation a3a; // [esp+Ch] [ebp-24h] BYREF
+	Rotation vectorB; // [esp+18h] [ebp-18h] BYREF
+	Rotation a2a; // [esp+24h] [ebp-Ch] BYREF
+
+	data->Status |= Status_Attack;
+	for (int i = 0; i < 4; i++) {
+		data->CollisionInfo->CollisionArray[i].damage &= 0xFCu;
+		data->CollisionInfo->CollisionArray[i].damage |= 0xCu;
+		data->CollisionInfo->CollisionArray[i].damage |= 0xEF;
+		data->CollisionInfo->CollisionArray[i].center = data->Position;
+		data->CollisionInfo->CollisionArray[i].center.y += 5;
+		data->CollisionInfo->CollisionArray[i].attr &= 0xFFFFFFEF;
+	}
+}
 
 void SuperTails_Manager(ObjectMaster* obj) {
 	EntityData1* data = obj->Data1;
 	EntityData1* player = EntityData1Ptrs[obj->Data1->CharIndex];
+	EntityData2* player2 = EntityData2Ptrs[obj->Data1->CharIndex];
 	CharObj2* co2 = CharObj2Ptrs[player->CharIndex];
 
 	switch (data->Action) {
@@ -158,9 +181,11 @@ void SuperTails_Manager(ObjectMaster* obj) {
 		}
 		break;
 	case 2:
+
 		SetSuperMiles(co2, player);
+			
 		if (!isTailsAI(player)) {
-			if (CurrentSuperMusic != None && CurrentSong != MusicIDs_sprsonic)
+			if (CurrentSuperMusic != None && CurrentSong != MusicIDs_sprsonic) 
 			{
 				ActualSong = LastSong;
 				Play_SuperTailsMusic();
@@ -170,11 +195,13 @@ void SuperTails_Manager(ObjectMaster* obj) {
 		break;
 	case 3:
 		SubRings(player->CharIndex);
+
+		//Tails_LoadAttackEffect(player2, co2, player);
 		if (isSuperTails || co2->Upgrades & Upgrades_SuperSonic) {
 
 			if (ControllerPointers[player->CharIndex]->PressedButtons & Buttons_Y || isTailsAI(player) && !isSuperSonic(0))
 			{
-				if (player->Action == Flying || player->Action == Jumping || player->Action == Standing) {
+				if (player->Action == Flying || player->Action == Jumping || player->Action == Standing || isTailsAI(player) && !isSuperSonic(0)) {
 					unSuper(player->CharIndex);
 					data->Action = 4;
 				}
@@ -208,7 +235,7 @@ void Tails_Delete_r(ObjectMaster* obj) {
 	origin(obj);
 }
 
-void SuperTails_PerformLightingThing() { //idk what it does exactly, but Sonic uses it for SS so...
+void SuperTails_PerformLightingThing() {
 	if (isSuperTails)
 		Direct3D_PerformLighting(4);
 	else
@@ -267,7 +294,6 @@ void SuperTailsCutscene_Delete() { //There is probably a nicer way to do this.
 			CharObj2Ptrs[0]->Powerups &= 0x100u;
 			CharObj2Ptrs[0]->PhysicsData = PhysicsArray[Characters_Tails];
 			CharObj2Ptrs[0]->PhysicsData.AirAccel = 0.03099999949;
-			DeleteFlicky();
 			isSuperTails = false;
 		}
 	}
@@ -275,22 +301,6 @@ void SuperTailsCutscene_Delete() { //There is probably a nicer way to do this.
 	return DisableControl();
 }
 
-
-void LoadCharTextures_R() {
-
-	LoadPVM("SUPERSONIC", &SUPERSONIC_TEXLIST);
-
-	if (isDCCharUsed) {
-		LoadPVM("SUPERMILES", &SuperMilesDC_TEXLIST);
-		LoadPVM("AMY_R", &FlickyDC_TEXLIST);
-	}
-	else {
-		LoadPVM("SUPERMILES", &SuperMiles_TEXLIST);
-		LoadPVM("AMY_R", &FlickyDX_TEXLIST);
-	}
-
-	ResetGravity();
-}
 
 
 void __cdecl SuperTails_Init(const char* path, const HelperFunctions& helperFunctions)
@@ -300,23 +310,27 @@ void __cdecl SuperTails_Init(const char* path, const HelperFunctions& helperFunc
 	if (SA1Char)
 	{
 		ReplacePVM("SUPERMILES", "SUPERMILES_DC");
-		ReplacePVM("AMY_R", "AMY_DC_R");
+
+		for (int i = 0; i < LengthOfArray(superTails_DCTex); i++) {
+			helperFunctions.RegisterCharacterPVM(Characters_Tails, superTails_DCTex[i]);
+		}
 		isDCCharUsed = true;
 	}
 	else
 	{
 		ReplacePVM("SUPERMILES", "SUPERMILES_DX");
-		ReplacePVM("AMY_R", "AMY_R");
+
+		for (int i = 0; i < LengthOfArray(superTails_DXTex); i++) {
+			helperFunctions.RegisterCharacterPVM(Characters_Tails, superTails_DXTex[i]);
+		}
 		isDCCharUsed = false;
 	}
 
 	Tails_Main_t = new Trampoline((int)Tails_Main, (int)Tails_Main + 0x7, Tails_Main_r);
 	Tails_Delete_t = new Trampoline((int)Tails_Delete, (int)Tails_Delete + 0x6, Tails_Delete_r);
 
-	//Textures init
-	WriteCall((void*)0x4c6316, NjSetTexture_Flicky);
-	WriteCall((void*)0x415387, LoadCharTextures_R);
 
+	//Textures init
 	WriteCall((void*)0x460C71, SuperTails_PerformLightingThing);
 	WriteCall((void*)0x460CBC, setSuperTailsTexture);
 
