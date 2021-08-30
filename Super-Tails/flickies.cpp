@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "flickies.h"
 
-
 ObjectMaster* flicky1;
 ObjectMaster* flicky2;
 ObjectMaster* flicky3;
@@ -22,16 +21,15 @@ float Flicky_GetAttackRange() {
 	return 1000.0f;
 }
 
-int value = 0;
-void ShiftEachFlicky(EntityData1* data1, EntityData1* player) {
+int turnFlicky = 0;
+void TurnAndShift_EachFlicky(EntityData1* data1, EntityData1* player) {
 
-
-	data1->Position.x = njSin(value) * 5.0f;
+	data1->Position.x = njSin(turnFlicky) * 5.0f;
 
 	if (data1->CharID > 0)
-		data1->Position.z = njCos(value) * 5.0f + 4.0 * data1->CharID;
+		data1->Position.z = njCos(turnFlicky) * 5.0f + 4.0 * data1->CharID;
 	else
-		data1->Position.z = njCos(value) * 5.0f;
+		data1->Position.z = njCos(turnFlicky) * 5.0f;
 
 	njAddVector(&data1->Position, &player->Position);
 	data1->Position.y = player->Position.y + 12.0;
@@ -50,11 +48,11 @@ void flicky_TurnAround(EntityData1* data1, EntityData1* player) {
 
 	if (CharObj2Ptrs[player->CharIndex]->Speed.x + CharObj2Ptrs[player->CharIndex]->Speed.y < 0.2f) {
 
-		value += 100;
-		ShiftEachFlicky(data1, player);
+		turnFlicky += 100;
+		TurnAndShift_EachFlicky(data1, player);
 	}
 	else {
-		value = 0;
+		turnFlicky = 0;
 		data1->Action = flicky_followPlayer;
 	}
 }
@@ -103,8 +101,6 @@ void Flicky_Delete(ObjectMaster* obj) {
 		flicky[i] = nullptr;
 	}
 }
-
-
 
 void CheckForAttack(EntityData1* data) {
 	HomingAttackTarget target = GetClosestAttack(&data->Position);
@@ -250,8 +246,6 @@ void Call_Flickies(int player) {
 	return;
 }
 
-
-
 Trampoline* OhNoImDead2_t;
 
 bool OhNoImDead2_r(EntityData1* a1, ObjectData2* a2) {
@@ -266,10 +260,8 @@ bool OhNoImDead2_r(EntityData1* a1, ObjectData2* a2) {
 		}
 	}
 
-
 	TARGET_DYNAMIC(OhNoImDead2)(a1, a2);
 }
-
 
 void initFlicky() {
 	OhNoImDead2_t = new Trampoline(0x004CE030, 0x004CE036, OhNoImDead2_r);
