@@ -5,8 +5,8 @@ int ActualSong = 0;
 
 ObjectMaster* SuperMiles_ObjManager;
 Trampoline* Tails_Main_t;
-Trampoline* Miles_CheckNextActions_t;
 Trampoline* Tails_Delete_t;
+Trampoline* ResetAngle_t;
 
 HelperFunctions help;
 
@@ -74,29 +74,43 @@ void unSuper(int player) {
 }
 
 
+void FixSpringMomentum() {
+	WriteData<2>(reinterpret_cast<void*>(0x00443AF5), 0x90);
+}
+
+
+void Load_SuperAura(taskwk* data1) {
+
+	 task* superAura = (task*)LoadObject(LoadObj_Data1, 2, Sonic_SuperAura_Load);
+	if (superAura)
+	{
+		superAura->twp->counter.b[0] = data1->counter.b[0];
+	}
+}
+
+void Load_SuperPhysics(taskwk* data1) {
+
+	task* v11 = (task*)LoadObject(LoadObj_UnknownB, 2, Miles_SuperPhysics_Load);
+	if (v11)
+	{
+		v11->awp->work.ub[0] = data1->counter.b[0];
+	}
+}
 
 void SetSuperMiles(CharObj2* co2, EntityData1* data1) {
 
-	task* v10;
-	task* v11;
-	taskwk* taskw = (taskwk*)data1;
 
+	taskwk* taskw = (taskwk*)data1;
 
 	if (IsIngame() && CurrentSFX != None)
 		PlayVoice(7001);
 
 	co2->Upgrades |= Upgrades_SuperSonic;
 	co2->Powerups |= Powerups_Invincibility;
-	v10 = (task*)LoadObject(LoadObj_Data1, 2, Sonic_SuperAura_Load);
-	if (v10)
-	{
-		v10->twp->counter.b[0] = taskw->counter.b[0];
-	}
-	v11 = (task*)LoadObject(LoadObj_UnknownB, 2, Miles_SuperPhysics_Load);
-	if (v11)
-	{
-		v11->awp->work.ub[0] = taskw->counter.b[0];
-	}
+
+	Load_SuperAura(taskw);
+	Load_SuperPhysics(taskw);
+	FixSpringMomentum();
 	Call_Flickies(data1->CharIndex);
 	data1->Action = 1;
 	isSuperTails = true;
@@ -137,13 +151,37 @@ void MilesDoCollisionAttackStuff(EntityData1* data, motionwk2* data2, CharObj2* 
 	}
 }
 
+bool CheckUntransform_Input(int playerID) {
+
+	EntityData1* player = EntityData1Ptrs[playerID];
+
+	if (AlwaysSuperMiles)
+		return false;
+
+	if (isTailsAI(player) && !isPlayerOnSuperForm(0)) {
+		unSuper(player->CharIndex);
+		return true;
+	}
+
+	if (ControllerPointers[playerID]->PressedButtons & TransformButton)
+	{
+		if (player->Action == Flying || player->Action == Jumping || player->Action == Standing) {
+			unSuper(player->CharIndex);
+			return true;
+		}
+	}
+
+	return false;
+}
+
+
 bool CheckPlayer_Input(int playerID) {
 
 	EntityData1* data = EntityData1Ptrs[playerID];
 
-	if (ControllerPointers[data->CharIndex]->PressedButtons & Buttons_Y && (Rings >= 50 || RemoveLimitations) || isTailsAI(data) && isPlayerOnSuperForm(0))
+	if (ControllerPointers[data->CharIndex]->PressedButtons & TransformButton && (Rings >= 50 || RemoveLimitations) || isTailsAI(data) && isPlayerOnSuperForm(0))
 	{
-		if (data->Action == Jumping || data->Action == Flying || data->Action >= BoardSlide && data->Action <= BoardJump || isTailsAI(data) && isPlayerOnSuperForm(0)) {
+		if (data->Action == Jumping || data->Action == Flying || data->Action >= BoardSlide && data->Action <= BoardJump) {
 
 			return true;
 		}
@@ -224,17 +262,10 @@ void SuperMiles_Manager(ObjectMaster* obj) {
 		break;
 	case superTailsOnFrames:
 		SubRings(player->CharIndex);
+		co2->TailsFlightTime = 0.0f;
+		if (CheckUntransform_Input(player->CharIndex)) {
 
-		//Tails_LoadAttackEffect(player2, co2, player);
-		if (isSuperTails || co2->Upgrades & Upgrades_SuperSonic) {
-
-			if (ControllerPointers[player->CharIndex]->PressedButtons & Buttons_Y || isTailsAI(player) && !isPlayerOnSuperForm(0))
-			{
-				if (player->Action == Flying || player->Action == Jumping || player->Action == Standing || isTailsAI(player) && !isPlayerOnSuperForm(0)) {
-					unSuper(player->CharIndex);
-					data->Action = playerInputCheck;
-				}
-			}
+			data->Action = playerInputCheck;
 		}
 		break;
 	default:
@@ -300,34 +331,44 @@ void Tails_Main_r(ObjectMaster* obj) {
 
 	ObjectFunc(origin, Tails_Main_t->Target());
 	origin(obj);
-
-
 }
 
-
-
-void SuperTailsCutscene_Delete() { //There is probably a nicer way to do this.
-
-	ObjectMaster* P1 = GetCharacterObject(0);
-	if (GameState == 15)
+static void __cdecl ResetAngle_r(EntityData1* data, EntityData2* data2, CharObj2* co2)
+{
+	if (CurrentLevel != LevelIDs_PerfectChaos && co2->Upgrades & Upgrades_SuperSonic)
 	{
-		if (isSuperTails && (isTailsCurChar()) || CurrentCharacter == Characters_Tails)
+		float v4; // ecx
+		float v5; // eax
+		float v6; // ecx
+		NJS_VECTOR a2a; // [esp+4h] [ebp-Ch] BYREF
+		taskwk* twk = (taskwk*)data;
+
+		a2a.x = co2->Speed.x;
+		v4 = co2->Speed.z;
+		a2a.y = co2->Speed.y;
+		a2a.z = v4;
+		if (co2->PhysicsData.Run2 * co2->PhysicsData.Run2 >= a2a.z * a2a.z + a2a.y * a2a.y + a2a.x * a2a.x)
 		{
-			TailsAnimData[30].AnimationSpeed = 0;
-			CharObj2Ptrs[0]->Upgrades &= ~Upgrades_SuperSonic; //unSuper
-			CharObj2Ptrs[0]->Powerups &= 0x100u;
-			CharObj2Ptrs[0]->PhysicsData = PhysicsArray[Characters_Tails];
-			isSuperTails = false;
+			PConvertVector_P2G(twk, &a2a);
+			data->Rotation.x = BAMS_SubWrap(data->Rotation.x, GravityAngle_Z, 2048);
+			data->Rotation.z = BAMS_SubWrap(data->Rotation.z, GravityAngle_X, 2048);
+			PConvertVector_G2P(twk, &a2a);
+			v5 = a2a.y;
+			v6 = a2a.z;
+			co2->Speed.x = a2a.x;
+			co2->Speed.y = v5;
+			co2->Speed.z = v6;
 		}
 	}
-
-	return DisableControl();
+	else
+	{
+		TARGET_DYNAMIC(ResetAngle)(data, data2, co2);
+	}
 }
 
 
+void __cdecl Init_SuperTailsTextures(const char* path, const HelperFunctions& helperFunctions) {
 
-void __cdecl SuperTails_Init(const char* path, const HelperFunctions& helperFunctions)
-{
 	HMODULE SA1Char = GetModuleHandle(L"SA1_Chars");
 
 	if (SA1Char)
@@ -348,16 +389,25 @@ void __cdecl SuperTails_Init(const char* path, const HelperFunctions& helperFunc
 		}
 		isDCCharUsed = false;
 	}
+}
+
+void __cdecl SuperTails_Init(const char* path, const HelperFunctions& helperFunctions)
+{
+
+	Init_SuperTailsTextures(path, helperFunctions);
 
 	Tails_Main_t = new Trampoline((int)Tails_Main, (int)Tails_Main + 0x7, Tails_Main_r);
 	Tails_Delete_t = new Trampoline((int)Tails_Delete, (int)Tails_Delete + 0x6, Tails_Delete_r);
 
+	bool bSS = GetModuleHandle(L"Better-Super-Sonic");
+
+	if (!bSS) {
+		ResetAngle_t = new Trampoline(0x443AD0, 0x443AD7, ResetAngle_r);
+	}
+
+	initFlicky();
 
 	//Textures init
 	WriteCall((void*)0x460C71, SuperTails_PerformLightingThing);
 	WriteCall((void*)0x460CBC, setSuperTailsTexture);
-
-	//Delete Super Tails properly when you die, restart, game over or before a cutscene start.
-	WriteCall((void*)0x413728, SuperTailsCutscene_Delete);
-
 }

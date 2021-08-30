@@ -4,7 +4,7 @@ PhysicsData_t milesPhysicCopy;
 
 void __cdecl Miles_SuperPhysics_Delete(ObjectMaster* obj) {
 
-	memcpy(&milesPhysicCopy, &PhysicsArray[Characters_Tails], sizeof(PhysicsData_t));
+	memcpy(&PhysicsArray[Characters_Tails], &milesPhysicCopy, sizeof(PhysicsData_t));
 }
 
 void __cdecl Miles_SuperPhysics_Load(ObjectMaster* obj)
@@ -17,11 +17,7 @@ void __cdecl Miles_SuperPhysics_Load(ObjectMaster* obj)
 	v2 = GetCharObj2(v1->Time);
 	if (v2)
 	{
-		memcpy(&milesPhysicCopy, &PhysicsArray[Characters_Sonic], sizeof(PhysicsData_t));
-		v1->Index = v2->PhysicsData.RollDecel;
-		v1->Mode = v2->PhysicsData.AirDecel;
-		v1->field_C = v2->PhysicsData.AirAccel;
-		v2->PhysicsData = PhysicsArray[Characters_Sonic];
+		memcpy(&milesPhysicCopy, &PhysicsArray[Characters_Tails], sizeof(PhysicsData_t));
 		v2->PhysicsData.RollDecel = -0.001;
 		v2->PhysicsData.AirDecel = -0.0020000001;
 		v2->PhysicsData.AirAccel = 0.035;

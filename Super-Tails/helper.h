@@ -8,6 +8,7 @@ extern bool AnimationTransfo;
 extern int ActualSong;
 extern bool isSuperTails;
 extern bool AlwaysSuperMiles;
+extern Buttons TransformButton;
 
 FunctionPointer(ObjectMaster*, CheckLoadBird, (), 0x4C6820);
 ObjectFunc(LoadBird, 0x4c6790);
@@ -27,6 +28,7 @@ void Call_Flickies(int player);
 void RestoreMusic();
 void Play_SuperTailsMusic();
 bool isTailsCurChar();
+void initFlicky();
 
 enum SuperTailsMusic {
 

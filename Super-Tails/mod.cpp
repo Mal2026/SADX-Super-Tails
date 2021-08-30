@@ -5,6 +5,14 @@ int CurrentSFX = SADX_SFX;
 bool AnimationTransfo = true;
 bool RemoveLimitations = false;
 bool AlwaysSuperMiles = false;
+Buttons TransformButton = Buttons_Y;
+
+static const Buttons ButtonsList[]
+{
+	Buttons_B,
+	Buttons_Y,
+	Buttons_X,
+};
 
 extern "C" {
 
@@ -21,6 +29,8 @@ extern "C" {
 		//Ini file configuration
 
 		const IniFile* config = new IniFile(std::string(path) + "\\config.ini");
+
+		TransformButton = ButtonsList[config->getInt("General", "TransformButton", 1)];
 		AnimationTransfo = config->getBool("General", "AnimationTransfo", true);
 		RemoveLimitations = config->getBool("General", "RemoveLimitations", false);
 		AlwaysSuperMiles = config->getBool("General", "AlwaysSuperMiles", false);
@@ -39,6 +49,7 @@ extern "C" {
 
 	__declspec(dllexport) void __cdecl OnFrame()
 	{
+
 
 		//SetDebugFontSize(13.0f * (unsigned short)VerticalResolution / 480.0f);
 		//DisplayDebugStringFormatted(NJM_LOCATION(2, 1), "Current bird: %d", birdCount);
