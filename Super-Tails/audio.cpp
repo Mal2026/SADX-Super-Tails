@@ -25,6 +25,17 @@ void Play_SuperTailsMusic() {
 	return;
 }
 
+void CheckSuperMusic_Restart(int playerID) {
+	if (!IsIngame() || !CharObj2Ptrs[playerID] || EV_MainThread_ptr || CurrentSong == MusicIDs_rndclear)
+		return;
+
+	if (CharObj2Ptrs[playerID]->Upgrades & Upgrades_SuperSonic && !isTailsAI(EntityData1Ptrs[playerID])) {
+		if (CurrentSong != MusicIDs_sprsonic && CurrentSong != -1 && CurrentSong != 255) {
+			ActualSong = CurrentSong;
+			Play_SuperTailsMusic();
+		}
+	}
+}
 
 void RestoreMusic() {
 

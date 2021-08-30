@@ -59,7 +59,7 @@ void unSuper(int player) {
 		}
 		data->Status &= ~Status_OnPath;
 
-		if (GameState == 15 && ControlEnabled)
+		if (IsIngame())
 		{
 			if (CurrentSFX == DBZ_SFX)
 				PlayVoice(7002);
@@ -74,12 +74,11 @@ void unSuper(int player) {
 }
 
 
-void FixSpringMomentum() {
-	WriteData<2>(reinterpret_cast<void*>(0x00443AF5), 0x90);
-}
-
-
 void Load_SuperAura(taskwk* data1) {
+
+	if (!superAura) {
+		return;
+	}
 
 	 task* superAura = (task*)LoadObject(LoadObj_Data1, 2, Sonic_SuperAura_Load);
 	if (superAura)
@@ -110,7 +109,6 @@ void SetSuperMiles(CharObj2* co2, EntityData1* data1) {
 
 	Load_SuperAura(taskw);
 	Load_SuperPhysics(taskw);
-	FixSpringMomentum();
 	Call_Flickies(data1->CharIndex);
 	data1->Action = 1;
 	isSuperTails = true;
@@ -179,7 +177,11 @@ bool CheckPlayer_Input(int playerID) {
 
 	EntityData1* data = EntityData1Ptrs[playerID];
 
-	if (ControllerPointers[data->CharIndex]->PressedButtons & TransformButton && (Rings >= 50 || RemoveLimitations) || isTailsAI(data) && isPlayerOnSuperForm(0))
+	if (isTailsAI(data) && isPlayerOnSuperForm(0)) {
+		return true;
+	}
+
+	if (ControllerPointers[data->CharIndex]->PressedButtons & TransformButton && (Rings >= 50 || RemoveLimitations))
 	{
 		if (data->Action == Jumping || data->Action == Flying || data->Action >= BoardSlide && data->Action <= BoardJump) {
 
@@ -267,6 +269,7 @@ void SuperMiles_Manager(ObjectMaster* obj) {
 
 			data->Action = playerInputCheck;
 		}
+		CheckSuperMusic_Restart(player->CharIndex);
 		break;
 	default:
 		CheckThingButThenDeleteObject(obj);

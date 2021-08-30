@@ -197,7 +197,7 @@ void __cdecl Flicky_Main(ObjectMaster* obj) {
 	case flicky_turnAround:
 		flicky_TurnAround(data, player);
 		CheckForAttack(data);
-		//data->CollisionInfo->CollisionArray[0].damage = 0;
+		data->CollisionInfo->CollisionArray[0].damage = 0;
 		break;
 	case flicky_followPlayer:
 		FollowPlayer(data, player, co2);
