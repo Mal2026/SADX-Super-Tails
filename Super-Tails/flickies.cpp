@@ -9,7 +9,6 @@ ObjectMaster* flicky4;
 ObjectMaster* flicky[4] = { flicky1, flicky2, flicky3, flicky4 };
 CollisionData flickyCol = { 0, 0, 0x70, 0xE2, 0x10, {0}, 5.0, 2.0, 0.0, 0.0, 0, 0, 0 };
 
-
 int randFlicky = 0;
 
 float Flicky_GetFlightSpeed() {
@@ -97,8 +96,10 @@ void FollowPlayer(EntityData1* data, EntityData1* player, CharObj2* co2) {
 
 void Flicky_Delete(ObjectMaster* obj) {
 	for (int i = 0; i < LengthOfArray(flicky); i++) {
-		CheckThingButThenDeleteObject(flicky[i]);
-		flicky[i] = nullptr;
+		if (flicky[i]) {
+			CheckThingButThenDeleteObject(flicky[i]);
+			flicky[i] = nullptr;
+		}
 	}
 }
 
@@ -171,15 +172,10 @@ void __cdecl Flicky_Display(ObjectMaster* obj) {
 	ClampGlobalColorThing_Thing();
 	Direct3D_PerformLighting(0);
 
-	if (IsGamePaused())
-	{
-		shadow.Position.y = data->Position.y;
-		shadow.Position.z = data->Position.z;
-		shadow.Position.x = data->Position.x;
-		shadow.Rotation = data->Rotation;
-		shadow.Rotation.y = -data->Rotation.y;
-		DrawShadow(&shadow, 0.40000001);
-	}
+	shadow.Position = data->Position;
+	shadow.Rotation = data->Rotation;
+	shadow.Rotation.y = -data->Rotation.y;
+	DrawShadow(&shadow, 0.40000001);
 }
 
 
@@ -238,6 +234,10 @@ void __cdecl Load_Miles_Flickies(ObjectMaster* obj) {
 void Call_Flickies(int player) {
 
 	for (uint8_t i = 0; i < LengthOfArray(flicky); i++) {
+
+		if (flicky[i])
+			continue;
+
 		flicky[i] = LoadObject(LoadObj_Data1, 3, Load_Miles_Flickies);
 		flicky[i]->Data1->CharIndex = player;
 		flicky[i]->Data1->CharID = i;

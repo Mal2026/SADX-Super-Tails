@@ -108,3 +108,22 @@ HomingAttackTarget GetClosestAttack(NJS_VECTOR* pos) {
 	return target;
 }
 
+
+void LoadAnimationFile(AnimationFile** info, const char* name) {
+	PrintDebug("[Super Tails] Loading animation: %s... ", name);
+
+	std::string fullPath = "system\\anim\\";
+	fullPath = fullPath + name + ".saanim";
+
+	AnimationFile* anm = new AnimationFile(help.GetReplaceablePath(fullPath.c_str()));
+
+	if (anm->getmodelcount() == 0) {
+		PrintDebug("Failed!\n");
+		delete anm;
+		*info = nullptr;
+	}
+	else {
+		PrintDebug("Done.\n");
+		*info = anm;
+	}
+}

@@ -8,6 +8,7 @@ bool AlwaysSuperMiles = false;
 bool superAura = true;
 bool customPhysics = true;
 Buttons TransformButton = Buttons_Y;
+HelperFunctions help;
 
 static const Buttons ButtonsList[]
 {
@@ -28,8 +29,9 @@ extern "C" {
 				L"Super Tails Error", MB_OK | MB_ICONERROR);
 		}
 
-		//Ini file configuration
+		help = helperFunctions;
 
+		//Ini file configuration
 		const IniFile* config = new IniFile(std::string(path) + "\\config.ini");
 
 		TransformButton = ButtonsList[config->getInt("General", "TransformButton", 1)];
@@ -53,7 +55,6 @@ extern "C" {
 
 	__declspec(dllexport) void __cdecl OnFrame()
 	{
-
 
 		//SetDebugFontSize(13.0f * (unsigned short)VerticalResolution / 480.0f);
 		//DisplayDebugStringFormatted(NJM_LOCATION(2, 1), "Current bird: %d", birdCount);

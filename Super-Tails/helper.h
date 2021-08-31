@@ -12,6 +12,8 @@ extern bool superAura;
 extern bool customPhysics;
 extern Buttons TransformButton;
 
+extern HelperFunctions help;
+
 FunctionPointer(ObjectMaster*, CheckLoadBird, (), 0x4C6820);
 ObjectFunc(LoadBird, 0x4c6790);
 ObjectFunc(Bird_Main, 0x4c63f0);
@@ -55,8 +57,8 @@ enum TailsActions {
 	Standing = 1,
 	Jumping = 6,
 	Flying = 15,
-	BoardSlide = 48,
-	BoardJump = 52
+	BoardFall = 51,
+	BoardJump
 
 };
 

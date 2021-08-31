@@ -25,3 +25,4 @@ void LookAt(NJS_VECTOR* from, NJS_VECTOR* to, Angle* outx, Angle* outy);
 void MoveForward(EntityData1* entity, float speed);
 NJS_VECTOR GetPlayerPoint(EntityData1* player);
 NJS_VECTOR GetPointToFollow(NJS_VECTOR* pos, NJS_VECTOR* dir, Rotation3* rot);
+void LoadAnimationFile(AnimationFile** info, const char* name);

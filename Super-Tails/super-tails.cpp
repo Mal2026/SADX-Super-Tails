@@ -3,17 +3,52 @@
 
 int ActualSong = 0;
 
-ObjectMaster* SuperMiles_ObjManager;
 Trampoline* Tails_Main_t;
-Trampoline* Tails_Delete_t;
 Trampoline* ResetAngle_t;
 
-HelperFunctions help;
+ObjectMaster* damageObj;
+CollisionData damageCol = { 0, 0, 0x40, 0x41, 0x400, {0}, 4.0, 4.0, 0.0, 0.0, 0, 0, 0 };
 
 bool isDCCharUsed = false;
 bool isSuperTails = false;
 
+void DeleteDamageCol(ObjectMaster* obj) {
+	EntityData1* data = obj->Data1;
+	data->CollisionInfo = nullptr;
+	Collision_Free(obj);
+	damageObj = nullptr;
+}
+
+void DoDamageCol(ObjectMaster* obj) {
+
+	EntityData1* data = obj->Data1;
+	EntityData1* player = EntityData1Ptrs[data->CharIndex];
+	CharObj2* co2 = CharObj2Ptrs[data->CharIndex];
+
+	if (data->Action == 0) {
+
+		obj->DeleteSub = DeleteDamageCol;
+		Collision_Init(obj, &damageCol, 1, 4u);
+		data->CollisionInfo->CollisionArray[0].attr &= 0xFFFFFFEF;
+		data->CollisionInfo->CollisionArray[0].damage |= 3u;
+		data->Action++;
+	}
+
+	if (data->Action == 1) {
+		if (isSuperTails) {
+			data->Position = player->CollisionInfo->CollisionArray->center;
+			AddToCollisionList(data);
+		}
+		else {
+
+			CheckThingButThenDeleteObject(obj);
+		}
+	}
+
+}
+
 void SubRings(int player) {
+
 
 	if (RemoveLimitations || AlwaysSuperMiles || EntityData1Ptrs[player]->CharID != Characters_Tails || !isSuperTails || isTailsAI(EntityData1Ptrs[player]) || !ControlEnabled || !TimeThing || GameState != 15)
 		return;
@@ -35,41 +70,31 @@ void unSuper(int player) {
 	if (AlwaysSuperMiles)
 		return;
 
+	CheckThingButThenDeleteObject(damageObj);
+	TailsAnimData[30].AnimationSpeed = 0;
+	isSuperTails = false;
 
 	EntityData1* data = EntityData1Ptrs[player];
 	CharObj2* co2 = CharObj2Ptrs[player];
 
+	if (!data)
+		return;
 
-	if (isSuperTails)
+	co2->PhysicsData = PhysicsArray[Characters_Tails];
+	data->Status = 0;
+	ForcePlayerAction(0, 24);
+
+
+	if (IsIngame())
 	{
-		TailsAnimData[30].AnimationSpeed = 0;
-		co2->Upgrades &= ~Upgrades_SuperSonic;
-		co2->Powerups &= 0x100u;
-		data->Action = 1;
-		co2->IdleTime = 0;
-		co2->AnimationThing.Index = 1;
-		co2->PhysicsData = PhysicsArray[Characters_Tails];
+		if (CurrentSFX == DBZ_SFX)
+			PlayVoice(7002);
 
-		int status = data->Status;
-		bool v5 = (status & Status_Ball) == 0;
-
-		if (!v5)
-		{
-			data->Status = status & ~(Status_Attack | Status_Ball);
-		}
-		data->Status &= ~Status_OnPath;
-
-		if (IsIngame())
-		{
-			if (CurrentSFX == DBZ_SFX)
-				PlayVoice(7002);
-
-			RestoreMusic();
-		}
-
-		isSuperTails = false;
+		RestoreMusic();
 	}
 
+	co2->Upgrades &= ~Upgrades_SuperSonic;
+	co2->Powerups &= ~Powerups_Invincibility;
 	return;
 }
 
@@ -80,7 +105,7 @@ void Load_SuperAura(taskwk* data1) {
 		return;
 	}
 
-	 task* superAura = (task*)LoadObject(LoadObj_Data1, 2, Sonic_SuperAura_Load);
+	task* superAura = (task*)LoadObject(LoadObj_Data1, 2, Sonic_SuperAura_Load);
 	if (superAura)
 	{
 		superAura->twp->counter.b[0] = data1->counter.b[0];
@@ -105,48 +130,19 @@ void SetSuperMiles(CharObj2* co2, EntityData1* data1) {
 		PlayVoice(7001);
 
 	co2->Upgrades |= Upgrades_SuperSonic;
-	co2->Powerups |= Powerups_Invincibility;
 
 	Load_SuperAura(taskw);
 	Load_SuperPhysics(taskw);
 	Call_Flickies(data1->CharIndex);
+
+	if (!EV_MainThread_ptr && CurrentLevel >= 0 && CurrentLevel <= LevelIDs_E101R) {
+		damageObj = LoadObject((LoadObj)2, 1, DoDamageCol);
+		damageObj->Data1->CharIndex = data1->CharIndex;
+	}
 	data1->Action = 1;
 	isSuperTails = true;
 
 	return;
-}
-
-void MilesDoCollisionAttackStuff(EntityData1* data, motionwk2* data2, CharObj2* a2) {
-
-	Angle v3; // eax
-	Angle v4; // eax
-	Angle v5; // eax
-	ObjectMaster* v6; // eax
-	ObjectMaster* v7; // eax
-	ObjectMaster* v8; // eax
-	ObjectMaster* v9; // eax
-	float v10; // eax
-	int v11; // ecx
-	float v12; // edx
-	float v13; // eax
-	float v14; // ecx
-	float v15; // [esp+0h] [ebp-30h]
-	NJS_VECTOR v16; // [esp+0h] [ebp-30h]
-	float v17; // [esp+4h] [ebp-2Ch]
-	int v18; // [esp+8h] [ebp-28h]
-	Rotation a3a; // [esp+Ch] [ebp-24h] BYREF
-	Rotation vectorB; // [esp+18h] [ebp-18h] BYREF
-	Rotation a2a; // [esp+24h] [ebp-Ch] BYREF
-
-	data->Status |= Status_Attack;
-	for (int i = 0; i < 4; i++) {
-		data->CollisionInfo->CollisionArray[i].damage &= 0xFCu;
-		data->CollisionInfo->CollisionArray[i].damage |= 0xCu;
-		data->CollisionInfo->CollisionArray[i].damage |= 0xEF;
-		data->CollisionInfo->CollisionArray[i].center = data->Position;
-		data->CollisionInfo->CollisionArray[i].center.y += 5;
-		data->CollisionInfo->CollisionArray[i].attr &= 0xFFFFFFEF;
-	}
 }
 
 bool CheckUntransform_Input(int playerID) {
@@ -163,7 +159,7 @@ bool CheckUntransform_Input(int playerID) {
 
 	if (ControllerPointers[playerID]->PressedButtons & TransformButton)
 	{
-		if (player->Action == Flying || player->Action == Jumping || player->Action == Standing) {
+		if (player->Action == Flying || player->Action == Jumping) {
 			unSuper(player->CharIndex);
 			return true;
 		}
@@ -183,7 +179,7 @@ bool CheckPlayer_Input(int playerID) {
 
 	if (ControllerPointers[data->CharIndex]->PressedButtons & TransformButton && (Rings >= 50 || RemoveLimitations))
 	{
-		if (data->Action == Jumping || data->Action == Flying || data->Action >= BoardSlide && data->Action <= BoardJump) {
+		if (data->Action == Jumping || data->Action == Flying || data->Action == BoardFall || data->Action == BoardJump) {
 
 			return true;
 		}
@@ -202,16 +198,24 @@ void SuperMiles_PlayTransfoAnimation(EntityData1* player) {
 	CharObj2Ptrs[player->CharIndex]->AnimationThing.Index = 30;
 }
 
+
+
 void SuperMiles_Manager(ObjectMaster* obj) {
 
 	EntityData1* data = obj->Data1;
 	EntityData1* player = EntityData1Ptrs[obj->Data1->CharIndex];
-	EntityData2* player2 = EntityData2Ptrs[obj->Data1->CharIndex];
-	CharObj2* co2 = CharObj2Ptrs[player->CharIndex];
-	int timer = 30;
 
 	if (!player)
 		return;
+
+	EntityData2* player2 = EntityData2Ptrs[obj->Data1->CharIndex];
+	CharObj2* co2 = CharObj2Ptrs[player->CharIndex];
+	int timer = 30;
+	ObjectMaster* col;
+
+
+	if (player->CharID != Characters_Tails) //charsel fix
+		CheckThingButThenDeleteObject(obj);
 
 	switch (data->Action) {
 
@@ -229,9 +233,10 @@ void SuperMiles_Manager(ObjectMaster* obj) {
 		break;
 	case superTailsInit:
 		data->Index = 0;
-		player->Status &= ~(Status_OnPath | Status_Attack | Status_Ball);
+		player->Status = 0;
 		co2->Powerups |= Powerups_Invincibility;
 		SuperMiles_PlayTransfoAnimation(player);
+
 		data->Action++;
 		break;
 	case superTailsWait:
@@ -256,11 +261,8 @@ void SuperMiles_Manager(ObjectMaster* obj) {
 			}
 		}
 
-		if (AlwaysSuperMiles)
-			data->Action = 6;
-		else
-			data->Action++;
 
+		data->Action++;
 		break;
 	case superTailsOnFrames:
 		SubRings(player->CharIndex);
@@ -281,20 +283,6 @@ void SuperTailsDelete(ObjectMaster* obj) {
 
 	unSuper(obj->Data1->CharIndex);
 	MusicList[MusicIDs_sprsonic].Name = "sprsonic";
-
-	if (SuperMiles_ObjManager)
-		CheckThingButThenDeleteObject(SuperMiles_ObjManager);
-
-	SuperMiles_ObjManager = nullptr;
-
-}
-
-void Tails_Delete_r(ObjectMaster* obj) {
-
-	SuperTailsDelete(obj);
-
-	ObjectFunc(origin, Tails_Delete_t->Target());
-	origin(obj);
 }
 
 void SuperTails_PerformLightingThing() {
@@ -318,6 +306,7 @@ Sint32 __cdecl setSuperTailsTexture(NJS_TEXLIST* texlist)
 	return njSetTexture(texlist);
 }
 
+
 void Tails_Main_r(ObjectMaster* obj) {
 
 	EntityData1* data = obj->Data1;
@@ -326,10 +315,8 @@ void Tails_Main_r(ObjectMaster* obj) {
 
 
 	if (data->Action == 0) {
-		if (!SuperMiles_ObjManager) {
-			SuperMiles_ObjManager = LoadObject((LoadObj)2, 1, SuperMiles_Manager);
-			SuperMiles_ObjManager->Data1->CharIndex = data->CharIndex;
-		}
+		ObjectMaster* SuperMiles_ObjManager = LoadObject((LoadObj)2, 0, SuperMiles_Manager);
+		SuperMiles_ObjManager->Data1->CharIndex = data->CharIndex;
 	}
 
 	ObjectFunc(origin, Tails_Main_t->Target());
@@ -400,11 +387,11 @@ void __cdecl SuperTails_Init(const char* path, const HelperFunctions& helperFunc
 	Init_SuperTailsTextures(path, helperFunctions);
 
 	Tails_Main_t = new Trampoline((int)Tails_Main, (int)Tails_Main + 0x7, Tails_Main_r);
-	Tails_Delete_t = new Trampoline((int)Tails_Delete, (int)Tails_Delete + 0x6, Tails_Delete_r);
 
 	bool bSS = GetModuleHandle(L"Better-Super-Sonic");
+	bool SS = GetModuleHandle(L"sadx-super-sonic");
 
-	if (!bSS) {
+	if (!bSS && !SS) {
 		ResetAngle_t = new Trampoline(0x443AD0, 0x443AD7, ResetAngle_r);
 	}
 
