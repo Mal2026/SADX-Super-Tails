@@ -12,7 +12,6 @@ CollisionData flickyCol = { 0, 0, 0x70, 0xE2, 0x10, {0}, 5.0, 2.0, 0.0, 0.0, 0, 
 int randFlicky = 0;
 
 float Flicky_GetFlightSpeed() {
-
 	return 2.5f;
 }
 
@@ -107,7 +106,8 @@ void CheckForAttack(EntityData1* data) {
 	HomingAttackTarget target = GetClosestAttack(&data->Position);
 
 	if (target.entity && target.distance < Flicky_GetAttackRange()) {
-		randFlicky = rand() % 4;
+		randFlicky = rand() % 4; //unused for now
+		data->InvulnerableTime = 0;
 		data->Action = flicky_attack;
 	}
 
@@ -138,6 +138,14 @@ void FlickyAttack(ObjectMaster* obj) {
 		if (dist < 50.0f) {
 			data1->CollisionInfo->CollisionArray[0].attr &= 0xFFFFFFEF;
 			data1->CollisionInfo->CollisionArray[0].damage |= 3u;
+
+			if (++data1->InvulnerableTime == 120) { //failsafe to prevent softlock
+				data1->CollisionInfo->CollisionArray[0].attr |= 0x400u;
+				data1->CollisionInfo->CollisionArray[0].damage &= 0xFCu;
+				data1->Action = flicky_followPlayer;
+				data1->Status &= ~(StatusFlicky_Attacked);
+
+			}
 		}
 		else {
 			data1->CollisionInfo->CollisionArray[0].attr |= 0x400u;
@@ -177,7 +185,6 @@ void __cdecl Flicky_Display(ObjectMaster* obj) {
 	shadow.Rotation.y = -data->Rotation.y;
 	DrawShadow(&shadow, 0.40000001);
 }
-
 
 void __cdecl Flicky_Main(ObjectMaster* obj) {
 	EntityData1* data = obj->Data1;
@@ -235,7 +242,7 @@ void Call_Flickies(int player) {
 
 	for (uint8_t i = 0; i < LengthOfArray(flicky); i++) {
 
-		if (flicky[i])
+		if (flicky[i]) //if flicky already exist, skip.
 			continue;
 
 		flicky[i] = LoadObject(LoadObj_Data1, 3, Load_Miles_Flickies);

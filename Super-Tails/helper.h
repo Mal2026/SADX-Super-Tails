@@ -34,6 +34,7 @@ void Play_SuperTailsMusic();
 bool isTailsCurChar();
 void initFlicky();
 void CheckSuperMusic_Restart(int playerID);
+void WaterHack_Init();
 
 enum SuperTailsMusic {
 

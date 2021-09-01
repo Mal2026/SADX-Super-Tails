@@ -48,8 +48,9 @@ extern "C" {
 		if (AlwaysSuperMiles)
 			RemoveLimitations = true;
 
-		SuperTails_Init(path, helperFunctions);
-		Audio_Init(path, helperFunctions);
+		SuperTails_Init(path, helperFunctions); //Main Code to Load Super Miles
+		Audio_Init(path, helperFunctions); //Everything related to music and sound
+		WaterHack_Init(); // Hack to allow the player to float on water when using Super Form.
 	}
 
 

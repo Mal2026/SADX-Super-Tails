@@ -154,6 +154,7 @@
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="super-tails.cpp" />
     <ClCompile Include="util.cpp" />
+    <ClCompile Include="water-hack.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="flickies.h" />

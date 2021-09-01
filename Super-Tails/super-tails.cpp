@@ -23,6 +23,10 @@ void DoDamageCol(ObjectMaster* obj) {
 
 	EntityData1* data = obj->Data1;
 	EntityData1* player = EntityData1Ptrs[data->CharIndex];
+
+	if (!player || !IsIngame() || EV_MainThread_ptr)
+		CheckThingButThenDeleteObject(obj);
+
 	CharObj2* co2 = CharObj2Ptrs[data->CharIndex];
 
 	if (data->Action == 0) {
@@ -40,7 +44,6 @@ void DoDamageCol(ObjectMaster* obj) {
 			AddToCollisionList(data);
 		}
 		else {
-
 			CheckThingButThenDeleteObject(obj);
 		}
 	}
@@ -48,7 +51,6 @@ void DoDamageCol(ObjectMaster* obj) {
 }
 
 void SubRings(int player) {
-
 
 	if (RemoveLimitations || AlwaysSuperMiles || EntityData1Ptrs[player]->CharID != Characters_Tails || !isSuperTails || isTailsAI(EntityData1Ptrs[player]) || !ControlEnabled || !TimeThing || GameState != 15)
 		return;
@@ -205,17 +207,14 @@ void SuperMiles_Manager(ObjectMaster* obj) {
 	EntityData1* data = obj->Data1;
 	EntityData1* player = EntityData1Ptrs[obj->Data1->CharIndex];
 
-	if (!player)
+	if (!player || !IsIngame() || EV_MainThread_ptr)
 		return;
-
-	EntityData2* player2 = EntityData2Ptrs[obj->Data1->CharIndex];
-	CharObj2* co2 = CharObj2Ptrs[player->CharIndex];
-	int timer = 30;
-	ObjectMaster* col;
-
 
 	if (player->CharID != Characters_Tails) //charsel fix
 		CheckThingButThenDeleteObject(obj);
+
+	CharObj2* co2 = CharObj2Ptrs[player->CharIndex];
+	int timer = 30;
 
 	switch (data->Action) {
 
@@ -224,7 +223,7 @@ void SuperMiles_Manager(ObjectMaster* obj) {
 		data->Action++;
 	case playerInputCheck:
 
-		if (!IsIngame() || EV_MainThread_ptr || !AlwaysSuperMiles && !ControlEnabled)
+		if (!AlwaysSuperMiles && !ControlEnabled)
 			return;
 
 		if (CheckPlayer_Input(data->CharIndex) || AlwaysSuperMiles)
@@ -260,7 +259,6 @@ void SuperMiles_Manager(ObjectMaster* obj) {
 				Play_SuperTailsMusic();
 			}
 		}
-
 
 		data->Action++;
 		break;
@@ -306,13 +304,9 @@ Sint32 __cdecl setSuperTailsTexture(NJS_TEXLIST* texlist)
 	return njSetTexture(texlist);
 }
 
-
 void Tails_Main_r(ObjectMaster* obj) {
 
 	EntityData1* data = obj->Data1;
-	CharObj2* co2 = CharObj2Ptrs[data->CharIndex];
-	EntityData2* data2 = EntityData2Ptrs[data->CharIndex];
-
 
 	if (data->Action == 0) {
 		ObjectMaster* SuperMiles_ObjManager = LoadObject((LoadObj)2, 0, SuperMiles_Manager);
@@ -385,13 +379,11 @@ void __cdecl SuperTails_Init(const char* path, const HelperFunctions& helperFunc
 {
 
 	Init_SuperTailsTextures(path, helperFunctions);
-
 	Tails_Main_t = new Trampoline((int)Tails_Main, (int)Tails_Main + 0x7, Tails_Main_r);
 
 	bool bSS = GetModuleHandle(L"Better-Super-Sonic");
-	bool SS = GetModuleHandle(L"sadx-super-sonic");
 
-	if (!bSS && !SS) {
+	if (!bSS) {
 		ResetAngle_t = new Trampoline(0x443AD0, 0x443AD7, ResetAngle_r);
 	}
 
