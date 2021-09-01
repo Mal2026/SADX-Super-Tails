@@ -1,5 +1,7 @@
 # SADX Super Tails
 
+![alt text](https://i.imgur.com/bRCreIe.png)
+
 ![alt text](https://i.imgur.com/p5F78b7.png)
 
 1. Welcome to Super Tails v2.0!
