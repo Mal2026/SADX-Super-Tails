@@ -14,7 +14,7 @@ take a look at the features below.
 
 ![alt text](https://i.imgur.com/TfxezW5.png)
 
-- Appearance changes: Red eyes, angry face (thanks to Junkey and [Speeps](https://github.com/SPEEPSHighway))
+- Appearance changes: Glow yellow, red eyes, angry face (thanks to [MelonSpeedruns,](https://gamebanana.com/members/1624188) Junkey and [Speeps](https://github.com/SPEEPSHighway))
 - Golden Shield like Super Sonic
 - Move and Fly faster
 - Invincible
