@@ -2,9 +2,11 @@
 
 ![alt text](https://i.imgur.com/dIYhFiC.png)
 
-![alt text](https://i.imgur.com/p5F78b7.png)
 
 ## Welcome to Super Tails v2.0!
+
+![alt text](https://i.imgur.com/p5F78b7.png)
+
 This is a mod for the PC version of Sonic Adventure DX. It allows Miles to use his super form, this is similar to the [Super Sonic mod by Kell.](https://github.com/kellsnc/sadx-super-sonic)
 
 In gameplay, Super Tails gains a golden energy shield around himself, he is invincible and can move and fly faster. While transformed, Miles also summons his "army of death", aka the four super-transformed Flickies that follow him around. Similar to Sonic 3 & Knuckles, The flickies will protect Miles by destroying all enemies around. If you lose your super form, the Flickies will fly away. 
@@ -14,27 +16,27 @@ take a look at the features below.
 
 ![alt text](https://i.imgur.com/TfxezW5.png)
 
-- Appearance changes: Glow yellow, red eyes, angry face (thanks to [MelonSpeedruns,](https://gamebanana.com/members/1624188) Junkey and [Speeps](https://github.com/SPEEPSHighway))
+- Appearance changes: Glow yellow, red eyes, angry face (thanks to [MelonSpeedruns,](https://gamebanana.com/members/1624188) [Junkey](https://gamebanana.com/members/1946877) and [Speeps](https://github.com/SPEEPSHighway))
 - Golden Shield like Super Sonic
 - Move and Fly faster
 - Invincible
 - Summons the four super-transformed Flickies
 - Infinite flight
-- Custom button transformation
+- Water hack so you can float on the water.
+- Custom Button transformation
 - Custom Physics
+- Custom Super music
 - Custom Sound transformation
 - Option to always be Super Tails
 - Option to remove limitations (50 rings and ring drop).
 - Better Tails AI support (Tails AI Transformation).
-- Custom Super music
-- Water hack, so you can float on the water.
 
 
 ## Installation:
 - Make sure you have the latest version of SADX Mod Loader downloaded and installed from this [link.](https://sadxmodinstaller.unreliable.network/)
 - Download the latest version of Super Tails and place the entire folder in the mods folder.
 - If all the above steps have been done properly, you should be able to run SADX Mod Manager and select the mod in the list.
-- To configure options for Super Tails, select the mod in the Mod Manager and clic on 'Configure...' to see all the options.
+- To configure options for Super Tails, select the mod in the Mod Manager and click on 'Configure...' to see all the options.
 - Click on Save and play! 
 
 Enjoy!
