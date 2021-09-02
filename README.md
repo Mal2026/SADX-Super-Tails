@@ -14,20 +14,20 @@ take a look at the features below.
 
 ![alt text](https://i.imgur.com/TfxezW5.png)
 
-- V2.0: Overhaul of the whole mod, code cleanup and optimisation. (Should fix mod not working for people with previous versions.)
-- Reworked the options to make them similar to [Kell's Super Sonic Mod for consistency.](https://github.com/kellsnc/sadx-super-sonic)
+- Appearance changes: Red eyes, angry face (thanks to Junkey and [Speeps](https://github.com/SPEEPSHighway))
+- Golden Shield like Super Sonic
+- Move and Fly faster
+- Invincible
+- Summons the four super-transformed Flickies
+- Infinite flight
 - Custom button transformation
 - Custom Physics
+- Custom Sound transformation
 - Option to always be Super Tails
-- Option to turn off sound transformation
-- Merged option to remove limitation (50 rings and ring drop).
-- Miles can now fly infinitely when using Super Form.
-- Reworked the flickies, they no longer have the pendant whee.
-- Flickies now turn around Miles when you don't move. (Thanks Kell for this)
-- Added support for Better Tails AI, if Sonic turns into Super, Tails will do the same! POGGERS!
-- Super music now continue to play after any act change.
+- Option to remove limitations (50 rings and ring drop).
+- Better Tails AI support (Tails AI Transformation).
+- Custom Super music
 - Water hack, so you can float on the water.
-- Bug fixes: many.
 
 
 ## Installation:
