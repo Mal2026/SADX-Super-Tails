@@ -4,7 +4,7 @@
 
 ![alt text](https://i.imgur.com/p5F78b7.png)
 
-## 1. Welcome to Super Tails v2.0!
+## Welcome to Super Tails v2.0!
 This is a mod for the PC version of Sonic Adventure DX. It allows Miles to use his super form, this is similar to the Super Sonic mod by Kell, except you play a fox and he has
 his funny army of death, yes you read that right. 
 
@@ -29,13 +29,11 @@ take a look at the features below.
 - Bug fixes: many.
 
 
-## 2. Installation:
-
-    - Make sure you have the latest version of SADX Mod Loader downloaded and installed from this [link.](https://sadxmodinstaller.unreliable.network/)
-    - Download the latest version of Super Tails and place the entire folder in the mods folder.
-    - If all the above steps have been done properly, you should be able to run SADX Mod Manager and select the mod in the list.
-    - To configure options for Super Tails, select the mod in the Mod Manager and clic on 'Configure...' to see all the options.
-    - Click on Save and play! 
-
+## Installation:
+- Make sure you have the latest version of SADX Mod Loader downloaded and installed from this [link.](https://sadxmodinstaller.unreliable.network/)
+- Download the latest version of Super Tails and place the entire folder in the mods folder.
+- If all the above steps have been done properly, you should be able to run SADX Mod Manager and select the mod in the list.
+- To configure options for Super Tails, select the mod in the Mod Manager and clic on 'Configure...' to see all the options.
+- Click on Save and play! 
 
 Enjoy!
