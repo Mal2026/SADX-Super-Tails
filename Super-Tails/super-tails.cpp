@@ -123,6 +123,7 @@ void Load_SuperPhysics(taskwk* data1) {
 	}
 }
 
+int randomAngryFace = 0;
 void SetSuperMiles(CharObj2* co2, EntityData1* data1) {
 
 
@@ -142,6 +143,7 @@ void SetSuperMiles(CharObj2* co2, EntityData1* data1) {
 		damageObj->Data1->CharIndex = data1->CharIndex;
 	}
 	data1->Action = 1;
+	randomAngryFace = rand() % 2;
 	isSuperTails = true;
 
 	return;
@@ -200,6 +202,36 @@ void SuperMiles_PlayTransfoAnimation(EntityData1* player) {
 	CharObj2Ptrs[player->CharIndex]->AnimationThing.Index = 30;
 }
 
+facewk* face = 0;
+void Miles_SetAngryFace() {
+
+	if (!IsIngame() || EV_MainThread_ptr)
+		return;
+
+	for (int i = 0; i < 8; i++) {
+		task* player = (task*)PlayerPtrs[i];
+
+		if (!player)
+			continue;
+
+		if (player->twp->counter.b[1] != Characters_Tails)
+			continue;
+
+		if (player->twp->mode > 1) {
+			continue;
+		}
+
+		int curchar = PlayerPtrs[i]->Data1->CharID;
+		int faceaddress = (int)&player->twp->ewp->face;
+		faceaddress = faceaddress + 8; //Adjust address because this is 8 bytes off
+		face = (facewk*)faceaddress;
+		int number = randomAngryFace + 13;
+		face->old = number;
+		face->__new = number;
+		face->frame = 1;
+		face->nbFrame = 90000;
+	}
+}
 
 
 void SuperMiles_Manager(ObjectMaster* obj) {
@@ -270,6 +302,7 @@ void SuperMiles_Manager(ObjectMaster* obj) {
 			data->Action = playerInputCheck;
 		}
 		CheckSuperMusic_Restart(player->CharIndex);
+		Miles_SetAngryFace();
 		break;
 	default:
 		CheckThingButThenDeleteObject(obj);
