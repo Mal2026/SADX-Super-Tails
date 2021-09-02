@@ -1,19 +1,20 @@
-# SADX Super Tails
+# SADX Super Tails Mod
 
 ![alt text](https://i.imgur.com/dIYhFiC.png)
 
 ![alt text](https://i.imgur.com/p5F78b7.png)
 
 ## Welcome to Super Tails v2.0!
-This is a mod for the PC version of Sonic Adventure DX. It allows Miles to use his super form, this is similar to the Super Sonic mod by Kell, except you play a fox and he has
-his funny army of death, yes you read that right. 
+This is a mod for the PC version of Sonic Adventure DX. It allows Miles to use his super form, this is similar to the [Super Sonic mod by Kell.](https://github.com/kellsnc/sadx-super-sonic)
+
+In gameplay, Super Tails gains a golden energy shield around himself, he is invincible and can move and fly faster. While transformed, Miles also summons his "army of death", aka the four super-transformed Flickies that follow him around. Similar to Sonic 3 & Knuckles, The flickies will protect Miles by destroying all enemies around. If you lose your super form, the Flickies will fly away. 
 
 The **default button transformation is Y**, so simply collect 50 rings, jump, press Y and enjoy the show. However, there is more that you should know and many stuff are configurable if you
 take a look at the features below.
 
 ![alt text](https://i.imgur.com/TfxezW5.png)
 
-- Overhaul of the whole mod, code cleanup and optimisation. (Should fix mod not working for people with previous versions.)
+- V2.0: Overhaul of the whole mod, code cleanup and optimisation. (Should fix mod not working for people with previous versions.)
 - Reworked the options to make them similar to [Kell's Super Sonic Mod for consistency.](https://github.com/kellsnc/sadx-super-sonic)
 - Custom button transformation
 - Custom Physics
