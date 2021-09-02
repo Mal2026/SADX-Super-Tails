@@ -6,49 +6,8 @@ int ActualSong = 0;
 Trampoline* Tails_Main_t;
 Trampoline* ResetAngle_t;
 
-ObjectMaster* damageObj;
-CollisionData damageCol = { 0, 0, 0x40, 0x41, 0x400, {0}, 4.0, 4.0, 0.0, 0.0, 0, 0, 0 };
-
 bool isDCCharUsed = false;
 bool isSuperTails = false;
-
-void DeleteDamageCol(ObjectMaster* obj) {
-	EntityData1* data = obj->Data1;
-	data->CollisionInfo = nullptr;
-	Collision_Free(obj);
-	damageObj = nullptr;
-}
-
-void DoDamageCol(ObjectMaster* obj) {
-
-	EntityData1* data = obj->Data1;
-	EntityData1* player = EntityData1Ptrs[data->CharIndex];
-
-	if (!player || !IsIngame() || EV_MainThread_ptr)
-		CheckThingButThenDeleteObject(obj);
-
-	CharObj2* co2 = CharObj2Ptrs[data->CharIndex];
-
-	if (data->Action == 0) {
-
-		obj->DeleteSub = DeleteDamageCol;
-		Collision_Init(obj, &damageCol, 1, 4u);
-		data->CollisionInfo->CollisionArray[0].attr &= 0xFFFFFFEF;
-		data->CollisionInfo->CollisionArray[0].damage |= 3u;
-		data->Action++;
-	}
-
-	if (data->Action == 1) {
-		if (isSuperTails) {
-			data->Position = player->CollisionInfo->CollisionArray->center;
-			AddToCollisionList(data);
-		}
-		else {
-			CheckThingButThenDeleteObject(obj);
-		}
-	}
-
-}
 
 void SubRings(int player) {
 
@@ -72,7 +31,6 @@ void unSuper(int player) {
 	if (AlwaysSuperMiles)
 		return;
 
-	CheckThingButThenDeleteObject(damageObj);
 	TailsAnimData[30].AnimationSpeed = 0;
 	isSuperTails = false;
 
@@ -137,13 +95,7 @@ void SetSuperMiles(CharObj2* co2, EntityData1* data1) {
 	Load_SuperAura(taskw);
 	Load_SuperPhysics(taskw);
 	Call_Flickies(data1->CharIndex);
-
-	if (!EV_MainThread_ptr && CurrentLevel >= 0 && CurrentLevel <= LevelIDs_E101R) {
-		damageObj = LoadObject((LoadObj)2, 1, DoDamageCol);
-		damageObj->Data1->CharIndex = data1->CharIndex;
-	}
 	data1->Action = 1;
-	randomAngryFace = rand() % 2;
 	isSuperTails = true;
 
 	return;
@@ -218,6 +170,7 @@ void Miles_SetAngryFace() {
 			continue;
 
 		if (player->twp->mode > 1) {
+			randomAngryFace = rand() % 2;
 			continue;
 		}
 
@@ -348,6 +301,19 @@ void Tails_Main_r(ObjectMaster* obj) {
 
 	ObjectFunc(origin, Tails_Main_t->Target());
 	origin(obj);
+
+	CollisionInfo* collision_info = data->CollisionInfo;
+	if (collision_info)
+	{
+		CollisionData* collision_data = collision_info->CollisionArray;
+		if (CharObj2Ptrs[data->CharIndex]->Powerups & Powerups_Invincibility) 
+		{
+			//fix an issue where Invincibility doesn't make the character able to damage an enemy (in Vanilla this works for everyone but tails.)
+			collision_data->damage = 3 & 3 | collision_data->damage & 0xF0 | (4 * (3 & 3));
+			data->CollisionInfo->CollisionArray = collision_data;
+		}
+	}
+
 }
 
 static void __cdecl ResetAngle_r(EntityData1* data, EntityData2* data2, CharObj2* co2)
