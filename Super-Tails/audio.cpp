@@ -48,8 +48,28 @@ void RestoreMusic() {
 	}
 }
 
+void SuperTails_ResultVoice(int ID, void* a2, int a3, void* a4) {
+
+	if (!isSuperTails || ID != 1462) {
+		PlaySound(ID, a2, a3, a4);
+		return;
+	}
+
+	int rng = rand() % 2;
+
+	if (!rng) {
+		PlayVoice(649);
+	}
+	else {
+		PlayVoice(1805);
+	}
+}
+
 void __cdecl Audio_Init(const char* path, const HelperFunctions& helperFunctions)
 {
+
+	WriteCall((void*)0x428666, SuperTails_ResultVoice); 
+
 	if (CurrentSFX == None)
 		return;
 
@@ -65,6 +85,7 @@ void __cdecl Audio_Init(const char* path, const HelperFunctions& helperFunctions
 		AddSound1("7001", "s3kTransfo");
 		AddSound2("7001", "s3kTransfo");
 	}
+
 
 	return;
 }
