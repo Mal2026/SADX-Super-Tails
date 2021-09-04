@@ -1,9 +1,7 @@
 #include "stdafx.h"
 
-#define ReplaceMusic(SS, SSR) helperFunctions.ReplaceFile("system\\sounddata\\bgm\\wma\\" SS ".wma", "system\\Audio\\" SSR ".adx")
 #define AddSound1(A, B) helperFunctions.ReplaceFile("system\\sounddata\\voice_us\\wma\\" A ".wma", "system\\sfx\\" B ".adx");
 #define AddSound2(C, D) helperFunctions.ReplaceFile("system\\sounddata\\voice_jp\\wma\\" C ".wma", "system\\sfx\\" D ".adx");
-
 
 const char* SuperTailsMusic_Array[7] = {
 	"none", "sonic2", "sonic3", "s&k",

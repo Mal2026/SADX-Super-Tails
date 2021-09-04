@@ -32,4 +32,4 @@ PVMEntry superTails_DXTex[] = {
 	{ "SUPERSONIC", &SUPERSONIC_TEXLIST},
 };
 
-void __cdecl Miles_SuperPhysics_Load(ObjectMaster* obj);
+void Load_SuperPhysics(taskwk* data1);

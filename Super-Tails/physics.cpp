@@ -41,3 +41,14 @@ void __cdecl Miles_SuperPhysics_Load(ObjectMaster* obj)
 		DeleteObjectMaster(obj);
 	}
 }
+
+
+
+void Load_SuperPhysics(taskwk* data1) {
+
+	task* v11 = (task*)LoadObject(LoadObj_UnknownB, 2, Miles_SuperPhysics_Load);
+	if (v11)
+	{
+		v11->awp->work.ub[0] = data1->counter.b[0];
+	}
+}

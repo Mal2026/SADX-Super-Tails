@@ -86,7 +86,6 @@ NJS_VECTOR GetPlayerPoint(EntityData1* player) {
 }
 
 
-
 HomingAttackTarget GetClosestAttack(NJS_VECTOR* pos) {
 	HomingAttackTarget target = { 0, 1000000.0f };
 
