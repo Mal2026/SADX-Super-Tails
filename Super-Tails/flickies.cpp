@@ -238,7 +238,7 @@ void __cdecl Load_Miles_Flickies(ObjectMaster* obj) {
 	obj->DeleteSub = Flicky_Delete;
 }
 
-void Call_Flickies(int player) {
+void Call_Flickies(unsigned char player) {
 
 	for (uint8_t i = 0; i < LengthOfArray(flicky); i++) {
 

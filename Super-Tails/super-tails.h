@@ -7,6 +7,7 @@ enum SuperTailsM {
 	superTailsWait,
 	superTailsTransfo,
 	superTailsOnFrames,
+	superTailsUntransfo,
 };
 
 

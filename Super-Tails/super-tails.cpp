@@ -66,7 +66,7 @@ Sint32 __cdecl setSuperTailsTexture(NJS_TEXLIST* texlist)
 	return njSetTexture(texlist);
 }
 
-void SubRings(int player) {
+void SubRings(unsigned char player, EntityData1* data) {
 
 	if (RemoveLimitations || AlwaysSuperMiles || EntityData1Ptrs[player]->CharID != Characters_Tails || !isSuperTails || isTailsAI(EntityData1Ptrs[player]) || !ControlEnabled || !TimeThing || GameState != 15)
 		return;
@@ -76,14 +76,14 @@ void SubRings(int player) {
 	}
 
 	if (Rings <= 0) {
-		unSuper(player);
+		data->Action = superTailsUntransfo;
 	}
 
 	return;
 }
 
 
-void unSuper(int player) {
+void unSuper(unsigned char player) {
 
 	if (AlwaysSuperMiles)
 		return;
@@ -100,6 +100,7 @@ void unSuper(int player) {
 	co2->PhysicsData = PhysicsArray[Characters_Tails];
 	data->Status = 0;
 	ForcePlayerAction(0, 24);
+	EV_ClrFace(PlayerPtrs[player]);
 
 
 	if (IsIngame())
@@ -158,7 +159,7 @@ void SuperMiles_PlayTransfoAnimation(EntityData1* player) {
 	CharObj2Ptrs[player->CharIndex]->AnimationThing.Index = 30;
 }
 
-bool CheckUntransform_Input(int playerID) {
+bool CheckUntransform_Input(unsigned char playerID) {
 
 	EntityData1* player = EntityData1Ptrs[playerID];
 
@@ -182,7 +183,7 @@ bool CheckUntransform_Input(int playerID) {
 }
 
 
-bool CheckPlayer_Input(int playerID) {
+bool CheckPlayer_Input(unsigned char playerID) {
 
 	EntityData1* data = EntityData1Ptrs[playerID];
 
@@ -203,35 +204,34 @@ bool CheckPlayer_Input(int playerID) {
 
 facewk* face = 0;
 uint8_t randomAngryFace = 0;
-void Miles_SetAngryFace() {
+void Miles_SetAngryFace(unsigned char playerID) {
 
 	if (!IsIngame() || EV_MainThread_ptr)
 		return;
 
-	for (int i = 0; i < 8; i++) {
-		task* player = (task*)PlayerPtrs[i];
+	task* player = (task*)PlayerPtrs[playerID];
 
-		if (!player)
-			continue;
+	if (!player)
+		return;
 
-		if (player->twp->counter.b[1] != Characters_Tails)
-			continue;
+	int curchar = PlayerPtrs[playerID]->Data1->CharID;
 
-		if (player->twp->mode > 1) {
-			randomAngryFace = rand() % 2;
-			continue;
-		}
+	if (curchar != Characters_Tails)
+		return;
 
-		int curchar = PlayerPtrs[i]->Data1->CharID;
-		int faceaddress = (int)&player->twp->ewp->face;
-		faceaddress = faceaddress + 8; //Adjust address because this is 8 bytes off
-		face = (facewk*)faceaddress;
-		int number = randomAngryFace + 13;
-		face->old = number;
-		face->__new = number;
-		face->frame = 1;
-		face->nbFrame = 90000;
+	if (player->twp->mode > 1) {
+		randomAngryFace = rand() % 2;
+		return;
 	}
+
+	int faceaddress = (int)&player->twp->ewp->face;
+	faceaddress = faceaddress + 8; //Adjust address because this is 8 bytes off
+	face = (facewk*)faceaddress;
+	int number = randomAngryFace + 13;
+	face->old = number;
+	face->__new = number;
+	face->frame = 1;
+	face->nbFrame = 90000;
 }
 
 void SuperTailsDelete(ObjectMaster* obj) {
@@ -251,6 +251,7 @@ void SuperMiles_Manager(ObjectMaster* obj) {
 	if (player->CharID != Characters_Tails) //charsel fix
 		CheckThingButThenDeleteObject(obj);
 
+	unsigned char playerID = data->CharIndex;
 	CharObj2* co2 = CharObj2Ptrs[player->CharIndex];
 	int timer = 30;
 
@@ -264,7 +265,7 @@ void SuperMiles_Manager(ObjectMaster* obj) {
 		if (!AlwaysSuperMiles && !ControlEnabled)
 			return;
 
-		if (CheckPlayer_Input(data->CharIndex) || AlwaysSuperMiles)
+		if (CheckPlayer_Input(playerID) || AlwaysSuperMiles)
 			data->Action++;
 
 		break;
@@ -301,14 +302,18 @@ void SuperMiles_Manager(ObjectMaster* obj) {
 		data->Action++;
 		break;
 	case superTailsOnFrames:
-		SubRings(player->CharIndex);
+		SubRings(playerID, data);
 		co2->TailsFlightTime = 0.0f;
-		if (CheckUntransform_Input(player->CharIndex)) {
+		if (CheckUntransform_Input(playerID)) {
 
 			data->Action = playerInputCheck;
 		}
-		CheckSuperMusic_Restart(player->CharIndex);
-		Miles_SetAngryFace();
+		CheckSuperMusic_Restart(playerID);
+		Miles_SetAngryFace(playerID);
+		break;
+	case superTailsUntransfo:
+		unSuper(playerID);
+		data->Action = playerInputCheck;
 		break;
 	default:
 		CheckThingButThenDeleteObject(obj);
@@ -333,7 +338,7 @@ void Tails_Main_r(ObjectMaster* obj) {
 	if (collision_info)
 	{
 		CollisionData* collision_data = collision_info->CollisionArray;
-		if (CharObj2Ptrs[data->CharIndex]->Powerups & Powerups_Invincibility) 
+		if (CharObj2Ptrs[data->CharIndex]->Powerups & Powerups_Invincibility)
 		{
 			//fix an issue where Invincibility doesn't make the character able to damage an enemy (in Vanilla this works for everyone but tails.)
 			collision_data->damage = 3 & 3 | collision_data->damage & 0xF0 | (4 * (3 & 3));
