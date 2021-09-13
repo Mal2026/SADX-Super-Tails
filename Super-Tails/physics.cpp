@@ -1,10 +1,10 @@
 #include "stdafx.h"
 
-PhysicsData_t milesPhysicCopy;
+PhysicsData_t milesPhysicsCopy;
 
 void __cdecl Miles_SuperPhysics_Delete(ObjectMaster* obj) {
 
-	memcpy(&PhysicsArray[Characters_Tails], &milesPhysicCopy, sizeof(PhysicsData_t));
+	memcpy(&PhysicsArray[Characters_Tails], &milesPhysicsCopy, sizeof(PhysicsData_t));
 }
 
 
@@ -18,7 +18,7 @@ void __cdecl Miles_SuperPhysics_Load(ObjectMaster* obj)
 	v2 = GetCharObj2(v1->Time);
 	if (v2)
 	{
-		memcpy(&milesPhysicCopy, &PhysicsArray[Characters_Tails], sizeof(PhysicsData_t));
+		memcpy(&milesPhysicsCopy, &PhysicsArray[Characters_Tails], sizeof(PhysicsData_t));
 
 		if (!customPhysics) { //use vanilla broken super sonic physics
 			v2->PhysicsData.RollDecel = -0.001f;

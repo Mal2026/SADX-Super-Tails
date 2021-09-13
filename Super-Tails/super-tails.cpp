@@ -13,7 +13,6 @@ bool isSuperTails = false;
 
 static void Tails_Display_r(ObjectMaster* tsk)
 {
-
 	EntityData1* data = tsk->Data1;
 
 	isSuperTails = isPlayerOnSuperForm(data->CharIndex) == true ? 1 : 0;
