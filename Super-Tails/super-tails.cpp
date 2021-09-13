@@ -4,46 +4,22 @@
 int ActualSong = 0;
 
 Trampoline* Tails_Main_t;
+Trampoline* Tails_Display_t = nullptr;
 Trampoline* ResetAngle_t;
 
 bool isDCCharUsed = false;
 bool isSuperTails = false;
 
 
-//fix spring issue, only run if Super Sonic mod is disabled.
-static void __cdecl ResetAngle_r(EntityData1* data, EntityData2* data2, CharObj2* co2)
+static void Tails_Display_r(ObjectMaster* tsk)
 {
-	if (CurrentLevel != LevelIDs_PerfectChaos && co2->Upgrades & Upgrades_SuperSonic)
-	{
-		float v4; // ecx
-		float v5; // eax
-		float v6; // ecx
-		NJS_VECTOR a2a; // [esp+4h] [ebp-Ch] BYREF
-		taskwk* twk = (taskwk*)data;
 
-		a2a.x = co2->Speed.x;
-		v4 = co2->Speed.z;
-		a2a.y = co2->Speed.y;
-		a2a.z = v4;
-		if (co2->PhysicsData.Run2 * co2->PhysicsData.Run2 >= a2a.z * a2a.z + a2a.y * a2a.y + a2a.x * a2a.x)
-		{
-			PConvertVector_P2G(twk, &a2a);
-			data->Rotation.x = BAMS_SubWrap(data->Rotation.x, GravityAngle_Z, 2048);
-			data->Rotation.z = BAMS_SubWrap(data->Rotation.z, GravityAngle_X, 2048);
-			PConvertVector_G2P(twk, &a2a);
-			v5 = a2a.y;
-			v6 = a2a.z;
-			co2->Speed.x = a2a.x;
-			co2->Speed.y = v5;
-			co2->Speed.z = v6;
-		}
-	}
-	else
-	{
-		TARGET_DYNAMIC(ResetAngle)(data, data2, co2);
-	}
+	EntityData1* data = tsk->Data1;
+
+	isSuperTails = isPlayerOnSuperForm(data->CharIndex) == true ? 1 : 0;
+
+	TARGET_DYNAMIC(Tails_Display)(tsk);
 }
-
 
 void SuperTails_PerformLightingThing() {
 	if (isSuperTails)
@@ -60,7 +36,7 @@ Sint32 __cdecl setSuperTailsTexture(NJS_TEXLIST* texlist)
 		if (isDCCharUsed)
 			texlist = &SuperMilesDC_TEXLIST;
 		else
-			texlist = &SuperMiles_TEXLIST;
+			texlist = &SuperMilesDX_TEXLIST;
 	}
 
 	return njSetTexture(texlist);
@@ -97,7 +73,9 @@ void unSuper(unsigned char player) {
 	if (!data)
 		return;
 
-	co2->PhysicsData = PhysicsArray[Characters_Tails];
+	if (data->CharID == Characters_Tails) //fix an issue with charsel
+		co2->PhysicsData = PhysicsArray[Characters_Tails];
+
 	data->Status = 0;
 	ForcePlayerAction(0, 24);
 	EV_ClrFace(PlayerPtrs[player]);
@@ -144,7 +122,6 @@ void SetSuperMiles(CharObj2* co2, EntityData1* data1) {
 	Load_SuperPhysics(taskw);
 	Call_Flickies(data1->CharIndex);
 	data1->Action = 1;
-	isSuperTails = true;
 
 	return;
 }
@@ -260,6 +237,7 @@ void SuperMiles_Manager(ObjectMaster* obj) {
 	case superTailsSetTask:
 		obj->DeleteSub = SuperTailsDelete;
 		data->Action++;
+		break;
 	case playerInputCheck:
 
 		if (!AlwaysSuperMiles && !ControlEnabled)
@@ -354,29 +332,64 @@ void __cdecl Init_SuperTailsTextures(const char* path, const HelperFunctions& he
 
 	if (SA1Char)
 	{
-		ReplacePVM("SUPERMILES", "SUPERMILES_DC");
-
-		for (int i = 0; i < LengthOfArray(superTails_DCTex); i++) {
-			helperFunctions.RegisterCharacterPVM(Characters_Tails, superTails_DCTex[i]);
+		for (int i = 0; i < LengthOfArray(superTails_DCEntry); i++) {
+			helperFunctions.RegisterCharacterPVM(Characters_Tails, superTails_DCEntry[i]);
 		}
 		isDCCharUsed = true;
 	}
 	else
 	{
-		ReplacePVM("SUPERMILES", "SUPERMILES_DX");
-
-		for (int i = 0; i < LengthOfArray(superTails_DXTex); i++) {
-			helperFunctions.RegisterCharacterPVM(Characters_Tails, superTails_DXTex[i]);
+		for (int i = 0; i < LengthOfArray(superTails_DXEntry); i++) {
+			helperFunctions.RegisterCharacterPVM(Characters_Tails, superTails_DXEntry[i]);
 		}
 		isDCCharUsed = false;
 	}
 }
+
+
+
+//fix spring issue, only run if Super Sonic mod is disabled.
+static void __cdecl ResetAngle_r(EntityData1* data, EntityData2* data2, CharObj2* co2)
+{
+	if (CurrentLevel != LevelIDs_PerfectChaos && co2->Upgrades & Upgrades_SuperSonic)
+	{
+		float v4; // ecx
+		float v5; // eax
+		float v6; // ecx
+		NJS_VECTOR a2a; // [esp+4h] [ebp-Ch] BYREF
+		taskwk* twk = (taskwk*)data;
+
+		a2a.x = co2->Speed.x;
+		v4 = co2->Speed.z;
+		a2a.y = co2->Speed.y;
+		a2a.z = v4;
+		if (co2->PhysicsData.Run2 * co2->PhysicsData.Run2 >= a2a.z * a2a.z + a2a.y * a2a.y + a2a.x * a2a.x)
+		{
+			PConvertVector_P2G(twk, &a2a);
+			data->Rotation.x = BAMS_SubWrap(data->Rotation.x, GravityAngle_Z, 2048);
+			data->Rotation.z = BAMS_SubWrap(data->Rotation.z, GravityAngle_X, 2048);
+			PConvertVector_G2P(twk, &a2a);
+			v5 = a2a.y;
+			v6 = a2a.z;
+			co2->Speed.x = a2a.x;
+			co2->Speed.y = v5;
+			co2->Speed.z = v6;
+		}
+	}
+	else
+	{
+		TARGET_DYNAMIC(ResetAngle)(data, data2, co2);
+	}
+}
+
 
 void __cdecl SuperTails_Init(const char* path, const HelperFunctions& helperFunctions)
 {
 
 	Init_SuperTailsTextures(path, helperFunctions);
 	Tails_Main_t = new Trampoline((int)Tails_Main, (int)Tails_Main + 0x7, Tails_Main_r);
+	Tails_Display_t = new Trampoline((int)Tails_Display, (int)Tails_Display + 0x7, Tails_Display_r);
+
 
 	bool bSS = GetModuleHandle(L"Better-Super-Sonic");
 
