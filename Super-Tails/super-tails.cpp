@@ -31,7 +31,8 @@ void SuperTails_PerformLightingThing() {
 Sint32 __cdecl setSuperTailsTexture(NJS_TEXLIST* texlist)
 {
 
-	if (isSuperTails) {
+	if (isSuperTails && textureChanges) {
+
 		if (isDCCharUsed)
 			texlist = &SuperMilesDC_TEXLIST;
 		else

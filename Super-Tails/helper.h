@@ -10,6 +10,7 @@ extern bool isSuperTails;
 extern bool AlwaysSuperMiles;
 extern bool superAura;
 extern bool customPhysics;
+extern bool textureChanges;
 extern Buttons TransformButton;
 
 extern HelperFunctions help;
