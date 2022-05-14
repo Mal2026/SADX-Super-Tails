@@ -7,7 +7,6 @@ void __cdecl Miles_SuperPhysics_Delete(ObjectMaster* obj) {
 	memcpy(&PhysicsArray[Characters_Tails], &milesPhysicsCopy, sizeof(PhysicsData_t));
 }
 
-
 void __cdecl Miles_SuperPhysics_Load(ObjectMaster* obj)
 {
 

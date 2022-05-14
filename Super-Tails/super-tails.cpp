@@ -87,10 +87,11 @@ void unSuper(unsigned char player) {
 			PlayVoice(7002);
 
 		RestoreMusic();
+
+		co2->Upgrades &= ~Upgrades_SuperSonic;
+		co2->Powerups &= ~Powerups_Invincibility;
 	}
 
-	co2->Upgrades &= ~Upgrades_SuperSonic;
-	co2->Powerups &= ~Powerups_Invincibility;
 	return;
 }
 
