@@ -3,9 +3,9 @@
 
 int ActualSong = 0;
 
-Trampoline* Tails_Main_t;
+Trampoline* Tails_Main_t = nullptr;
 Trampoline* Tails_Display_t = nullptr;
-Trampoline* ResetAngle_t;
+Trampoline* Invincibility_restart_t = nullptr;
 
 bool isDCCharUsed = false;
 bool isSuperTails = false;
@@ -348,39 +348,20 @@ void __cdecl Init_SuperTailsTextures(const char* path, const HelperFunctions& he
 }
 
 
-
-//fix spring issue, only run if Super Sonic mod is disabled.
-static void __cdecl ResetAngle_r(EntityData1* data, EntityData2* data2, CharObj2* co2)
+//fix character not invincibile in superform after a restart lol
+void InvincibilityRestart_r(ObjectMaster* obj)
 {
-	if (CurrentLevel != LevelIDs_PerfectChaos && co2->Upgrades & Upgrades_SuperSonic)
-	{
-		float v4; // ecx
-		float v5; // eax
-		float v6; // ecx
-		NJS_VECTOR a2a; // [esp+4h] [ebp-Ch] BYREF
-		taskwk* twk = (taskwk*)data;
+	EntityData1* data = obj->Data1;
+	char pID = data->CharIndex;
 
-		a2a.x = co2->Speed.x;
-		v4 = co2->Speed.z;
-		a2a.y = co2->Speed.y;
-		a2a.z = v4;
-		if (co2->PhysicsData.Run2 * co2->PhysicsData.Run2 >= a2a.z * a2a.z + a2a.y * a2a.y + a2a.x * a2a.x)
-		{
-			PConvertVector_P2G(twk, &a2a);
-			data->Rotation.x = BAMS_SubWrap(data->Rotation.x, GravityAngle_Z, 2048);
-			data->Rotation.z = BAMS_SubWrap(data->Rotation.z, GravityAngle_X, 2048);
-			PConvertVector_G2P(twk, &a2a);
-			v5 = a2a.y;
-			v6 = a2a.z;
-			co2->Speed.x = a2a.x;
-			co2->Speed.y = v5;
-			co2->Speed.z = v6;
-		}
-	}
-	else
+	if (CharObj2Ptrs[pID] && CharObj2Ptrs[pID]->Upgrades & Upgrades_SuperSonic)
 	{
-		TARGET_DYNAMIC(ResetAngle)(data, data2, co2);
+		CheckThingButThenDeleteObject(obj);
+		return;
 	}
+
+	ObjectFunc(origin, Invincibility_restart_t->Target());
+	origin(obj);
 }
 
 
@@ -391,14 +372,9 @@ void __cdecl SuperTails_Init(const char* path, const HelperFunctions& helperFunc
 	Tails_Main_t = new Trampoline((int)Tails_Main, (int)Tails_Main + 0x7, Tails_Main_r);
 	Tails_Display_t = new Trampoline((int)Tails_Display, (int)Tails_Display + 0x7, Tails_Display_r);
 
-
-	bool bSS = GetModuleHandle(L"Better-Super-Sonic");
-
-	if (!bSS) {
-		ResetAngle_t = new Trampoline(0x443AD0, 0x443AD7, ResetAngle_r);
-	}
-
 	initFlicky();
+
+	Invincibility_restart_t = new Trampoline((int)0x441F80, (int)0x441F85, InvincibilityRestart_r);
 
 	//Textures init
 	WriteCall((void*)0x460C71, SuperTails_PerformLightingThing);
