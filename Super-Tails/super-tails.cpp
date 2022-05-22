@@ -58,7 +58,6 @@ void SubRings(unsigned char player, EntityData1* data) {
 	return;
 }
 
-
 void unSuper(unsigned char player) {
 
 	if (AlwaysSuperMiles)
@@ -114,7 +113,7 @@ void SetSuperMiles(CharObj2* co2, EntityData1* data1) {
 
 	taskwk* taskw = (taskwk*)data1;
 
-	if (IsIngame() && CurrentSFX != None)
+	if (IsIngame() && CurrentSFX != None && !isPerfectChasoLevel())
 		PlayVoice(7001);
 
 	co2->Upgrades |= Upgrades_SuperSonic;
@@ -197,8 +196,8 @@ void Miles_SetAngryFace(unsigned char playerID) {
 	if (curchar != Characters_Tails)
 		return;
 
-	if (player->twp->mode > 1) {
-		randomAngryFace = rand() % 2;
+	if (player->twp->mode == 1) {
+		randomAngryFace = 0;
 		return;
 	}
 
@@ -244,7 +243,7 @@ void SuperMiles_Manager(ObjectMaster* obj) {
 		if (!AlwaysSuperMiles && !ControlEnabled)
 			return;
 
-		if (CheckPlayer_Input(playerID) || AlwaysSuperMiles)
+		if (CheckPlayer_Input(playerID) || AlwaysSuperMiles || isPerfectChasoLevel())
 			data->Action++;
 
 		break;
@@ -281,13 +280,19 @@ void SuperMiles_Manager(ObjectMaster* obj) {
 		data->Action++;
 		break;
 	case superTailsOnFrames:
-		SubRings(playerID, data);
-		co2->TailsFlightTime = 0.0f;
-		if (CheckUntransform_Input(playerID)) {
 
-			data->Action = playerInputCheck;
+		if (!isPerfectChasoLevel()) {
+
+			SubRings(playerID, data);
+
+			if (CheckUntransform_Input(playerID)) {
+
+				data->Action = playerInputCheck;
+			}
+			CheckSuperMusic_Restart(playerID);
 		}
-		CheckSuperMusic_Restart(playerID);
+
+		co2->TailsFlightTime = 0.0f;
 		Miles_SetAngryFace(playerID);
 		break;
 	case superTailsUntransfo:

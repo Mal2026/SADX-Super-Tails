@@ -126,3 +126,8 @@ void LoadAnimationFile(AnimationFile** info, const char* name) {
 		*info = anm;
 	}
 }
+
+bool isPerfectChasoLevel()
+{
+	return CurrentLevel == LevelIDs_PerfectChaos && CurrentAct == 0;
+}
