@@ -257,20 +257,27 @@ Trampoline* OhNoImDead2_t;
 
 bool OhNoImDead2_r(EntityData1* a1, ObjectData2* a2) {
 
-	if (a1->CollisionInfo->CollidingObject) {
-		if (a1->CollisionInfo->CollidingObject->Object->MainSub == Flicky_Main) {
-			EntityData1* data = a1->CollisionInfo->CollidingObject->Object->Data1;
-			if (data->CollisionInfo->Object->MainSub != OParasol_Main) {
-				data->Status |= StatusFlicky_Attacked;
-				return true;
+	if (isSuperTails) {
+
+		if (a1 && a1->CollisionInfo && a1->CollisionInfo->CollidingObject && a1->CollisionInfo->CollidingObject->Object) {
+
+			if (a1->CollisionInfo->CollidingObject->Object->MainSub == Flicky_Main) {
+
+				EntityData1* data = a1->CollisionInfo->CollidingObject->Object->Data1;
+
+				if (data->CollisionInfo->Object->MainSub != OParasol_Main) {
+					data->Status |= StatusFlicky_Attacked;
+					return true;
+				}
 			}
+
 		}
 	}
 
-	TARGET_DYNAMIC(OhNoImDead2)(a1, a2);
+	return TARGET_DYNAMIC(OhNoImDead2)(a1, a2);
 }
 
 void initFlicky() {
-	OhNoImDead2_t = new Trampoline(0x004CE030, 0x004CE036, OhNoImDead2_r);
+	OhNoImDead2_t = new Trampoline(0x4CE030, 0x4CE036, OhNoImDead2_r);
 	return;
 }
