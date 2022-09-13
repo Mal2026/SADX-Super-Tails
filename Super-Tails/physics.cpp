@@ -1,57 +1,52 @@
 #include "stdafx.h"
 
-PhysicsData_t milesPhysicsCopy;
+PhysicsData_t milesPhysicsCopy = { 0 };
 static FunctionHook<void, EntityData1*, EntityData2*, CharObj2*> ResetAngle_t((intptr_t)0x443AD0);
 
-void __cdecl Miles_SuperPhysics_Delete(ObjectMaster* obj) {
+void __cdecl Miles_SuperPhysics_Delete(task* obj) {
 
 	memcpy(&PhysicsArray[Characters_Tails], &milesPhysicsCopy, sizeof(PhysicsData_t));
 }
 
-void __cdecl Miles_SuperPhysics_Load(ObjectMaster* obj)
+void __cdecl Miles_SuperPhysics_Load(task* obj)
 {
+	auto awp = (anywk*)obj->awp;
+	auto co2 = GetCharObj2(awp->work.ub[0]);
 
-	ObjUnknownB* v1; // esi
-	CharObj2* v2; // eax
-
-	v1 = (ObjUnknownB*)obj->UnknownB_ptr;
-	v2 = GetCharObj2(v1->Time);
-	if (v2)
+	if (co2)
 	{
 		memcpy(&milesPhysicsCopy, &PhysicsArray[Characters_Tails], sizeof(PhysicsData_t));
 
 		if (!customPhysics || isPerfectChasoLevel()) { //use vanilla broken super sonic physics
-			v2->PhysicsData.RollDecel = -0.001f;
-			v2->PhysicsData.AirDecel = -0.0020000001f;
-			v2->PhysicsData.AirAccel = 0.050000001f;
+			co2->PhysicsData.RollDecel = -0.001f;
+			co2->PhysicsData.AirDecel = -0.0020000001f;
+			co2->PhysicsData.AirAccel = 0.050000001f;
 		}
 		else {
-			v2->PhysicsData.GroundAccel = 0.065f;
-			v2->PhysicsData.RollDecel = -0.006f;
-			v2->PhysicsData.AirDecel = -0.01799999999f;
-			v2->PhysicsData.AirAccel = 0.040f;
-			v2->PhysicsData.MaxAccel = 3.0f;
+			co2->PhysicsData.GroundAccel = 0.065f;
+			co2->PhysicsData.RollDecel = -0.006f;
+			co2->PhysicsData.AirDecel = -0.01799999999f;
+			co2->PhysicsData.AirAccel = 0.040f;
+			co2->PhysicsData.MaxAccel = 3.0f;
 		}
 
-		obj->DeleteSub = Miles_SuperPhysics_Delete;
-		obj->MainSub = Sonic_SuperPhysics_Main;
+		obj->dest = Miles_SuperPhysics_Delete;
+		obj->exec = (TaskFuncPtr)Sonic_SuperPhysics_Main;
 	}
 	else
 	{
-		DeleteObjectMaster(obj);
+		FreeTask(obj);
 	}
 }
-
 
 void Load_SuperPhysics(taskwk* data1) {
 
-	task* v11 = (task*)LoadObject(LoadObj_UnknownB, 2, Miles_SuperPhysics_Load);
-	if (v11)
+	auto task = CreateElementalTask(LoadObj_UnknownB, 2, Miles_SuperPhysics_Load);
+	if (task)
 	{
-		v11->awp->work.ub[0] = data1->counter.b[0];
+		task->awp->work.ub[0] = data1->counter.b[0];
 	}
 }
-
 
 //fix spring issue, only run if Super Sonic mod is disabled.
 static void __cdecl ResetAngle_r(EntityData1* data, EntityData2* data2, CharObj2* co2)
@@ -83,7 +78,6 @@ static void __cdecl ResetAngle_r(EntityData1* data, EntityData2* data2, CharObj2
 
 void init_PhysicsHack()
 {
-
 	bool bSS = GetModuleHandle(L"Better-Super-Sonic");
 
 	if (!bSS) {
