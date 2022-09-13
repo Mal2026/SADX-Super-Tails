@@ -33,4 +33,10 @@ PVMEntry superTails_DXEntry[] = {
 	{"SUPERSONIC", &SUPERSONIC_TEXLIST},
 };
 
+//if player set "no textures changes"
+PVMEntry superTails_Entry[] = {
+	{"flickyTex", &Flicky_TEXLIST  },
+	{"SUPERSONIC", &SUPERSONIC_TEXLIST},
+};
+
 void Load_SuperPhysics(taskwk* data1);

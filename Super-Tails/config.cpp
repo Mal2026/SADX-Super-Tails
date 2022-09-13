@@ -7,7 +7,7 @@ bool RemoveLimitations = false;
 bool AlwaysSuperMiles = false;
 bool superAura = true;
 bool customPhysics = true;
-bool textureChanges = true;
+int charType = Dreamcast;
 
 Buttons TransformButton = Buttons_Y;
 
@@ -23,7 +23,7 @@ void initConfig(const char* path)
 	//Ini file configuration
 	const IniFile* config = new IniFile(std::string(path) + "\\config.ini");
 
-	textureChanges = config->getBool("General", "textureChanges", true);
+	charType = config->getInt("General", "charType", Dreamcast);
 	TransformButton = ButtonsList[config->getInt("General", "TransformButton", 1)];
 	AnimationTransfo = config->getBool("General", "AnimationTransfo", true);
 	RemoveLimitations = config->getBool("General", "RemoveLimitations", false);

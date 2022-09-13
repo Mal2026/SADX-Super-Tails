@@ -7,7 +7,6 @@ TaskHook Tails_Main_t(MilesTalesPrower);
 TaskHook Tails_Display_t(MilesDisplay);
 TaskHook Invincibility_restart_t((intptr_t)0x441F80);
 
-bool isDCCharUsed = false;
 bool isSuperTails = false;
 
 static void Tails_Display_r(task* tsk)
@@ -19,13 +18,12 @@ static void Tails_Display_r(task* tsk)
 	Tails_Display_t.Original(tsk);
 }
 
-
 // Sets the texture list to use when rendering.
 Sint32 __cdecl setSuperTailsTexture(NJS_TEXLIST* texlist)
 {
-	if (isSuperTails && textureChanges) {
+	if (isSuperTails && charType != none) {
 
-		if (isDCCharUsed)
+		if (charType == Dreamcast)
 			texlist = &SuperMilesDC_TEXLIST;
 		else
 			texlist = &SuperMilesDX_TEXLIST;
@@ -50,7 +48,7 @@ void SubRings(unsigned char player, EntityData1* data) {
 	return;
 }
 
-void unSuper(unsigned char player) {
+void unSuper(unsigned char pnum) {
 
 	if (AlwaysSuperMiles)
 		return;
@@ -58,8 +56,10 @@ void unSuper(unsigned char player) {
 	TailsAnimData[30].AnimationSpeed = 0;
 	isSuperTails = false;
 
-	EntityData1* data = EntityData1Ptrs[player];
-	CharObj2* co2 = CharObj2Ptrs[player];
+	auto player = playertp[pnum];
+
+	EntityData1* data = EntityData1Ptrs[pnum];
+	CharObj2* co2 = CharObj2Ptrs[pnum];
 
 	if (!data)
 		return;
@@ -68,9 +68,8 @@ void unSuper(unsigned char player) {
 		co2->PhysicsData = PhysicsArray[Characters_Tails];
 
 	data->Status = 0;
+	EV_ClrFace(player);
 	ForcePlayerAction(0, 24);
-	EV_ClrFace(PlayerPtrs[player]);
-
 
 	if (IsIngame())
 	{
@@ -171,29 +170,30 @@ bool CheckPlayer_Input(unsigned char playerID) {
 	return false;
 }
 
-facewk* face = 0;
 
 void Miles_SetAngryFace(unsigned char playerID) {
 
 	if (!IsIngame() || EV_MainThread_ptr)
 		return;
 
-	task* player = (task*)PlayerPtrs[playerID];
+	auto player = playertp[playerID];
 
 	if (!player)
 		return;
 
-	int curchar = PlayerPtrs[playerID]->Data1->CharID;
+	auto data = player->twp;
+
+	char curchar = playertwp[playerID]->counter.b[1];
 
 	if (curchar != Characters_Tails)
 		return;
 
+	auto face = &player->twp->ewp->face;
+	char number = 13;
 
+	if (data->mode > 2)
+		number = 0;
 
-	int faceaddress = (int)&player->twp->ewp->face;
-	faceaddress = faceaddress; //Adjust address because this is 8 bytes off
-	face = (facewk*)faceaddress;
-	int number = 13;
 	face->old = number;
 	face->__new = number;
 	face->frame = 1;
@@ -323,21 +323,22 @@ void Tails_Main_r(task* obj) {
 
 void __cdecl Init_SuperTailsTextures(const char* path, const HelperFunctions& helperFunctions) {
 
-	HMODULE SA1Char = GetModuleHandle(L"SA1_Chars");
-
-	if (SA1Char)
+	if (charType == Dreamcast)
 	{
 		for (int i = 0; i < LengthOfArray(superTails_DCEntry); i++) {
 			helperFunctions.RegisterCharacterPVM(Characters_Tails, superTails_DCEntry[i]);
 		}
-		isDCCharUsed = true;
 	}
-	else
+	else if (charType == DX)
 	{
 		for (int i = 0; i < LengthOfArray(superTails_DXEntry); i++) {
 			helperFunctions.RegisterCharacterPVM(Characters_Tails, superTails_DXEntry[i]);
 		}
-		isDCCharUsed = false;
+	}
+	else {
+		for (int i = 0; i < LengthOfArray(superTails_Entry); i++) {
+			helperFunctions.RegisterCharacterPVM(Characters_Tails, superTails_Entry[i]);
+		}
 	}
 }
 
@@ -354,14 +355,12 @@ void InvincibilityRestart_r(task* obj)
 		return;
 	}
 
-
 	Invincibility_restart_t.Original(obj);
 }
 
 
 void __cdecl SuperTails_Init(const char* path, const HelperFunctions& helperFunctions)
 {
-
 	Init_SuperTailsTextures(path, helperFunctions);
 	Tails_Main_t.Hook(Tails_Main_r);
 	Tails_Display_t.Hook(Tails_Display_r);

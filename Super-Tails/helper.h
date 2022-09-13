@@ -1,6 +1,5 @@
 #pragma once
 
-extern bool isDCCharUsed;
 extern int CurrentSuperMusic;
 extern bool RemoveLimitations;
 extern int CurrentSFX;
@@ -10,7 +9,7 @@ extern bool isSuperTails;
 extern bool AlwaysSuperMiles;
 extern bool superAura;
 extern bool customPhysics;
-extern bool textureChanges;
+extern int charType;
 extern Buttons TransformButton;
 
 extern HelperFunctions help;
@@ -20,7 +19,7 @@ extern HelperFunctions help;
 
 ObjectFunc(UpdateSetDataAndDelete, 0x46C150);
 VoidFunc(FUN_00412ad0, 0x412ad0);
-ObjectFunc(EV_ClrFace, 0x4310F0);
+TaskFunc(EV_ClrFace, 0x4310F0);
 
 void __cdecl Audio_Init(const char* path, const HelperFunctions& helperFunctions);
 void __cdecl SuperTails_Init(const char* path, const HelperFunctions& helperFunctions);
@@ -63,3 +62,10 @@ enum TailsActions {
 
 };
 
+
+enum charTypeE
+{
+	none,
+	Dreamcast,
+	DX,
+};
