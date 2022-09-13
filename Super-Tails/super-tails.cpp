@@ -10,7 +10,6 @@ Trampoline* Invincibility_restart_t = nullptr;
 bool isDCCharUsed = false;
 bool isSuperTails = false;
 
-
 static void Tails_Display_r(ObjectMaster* tsk)
 {
 	EntityData1* data = tsk->Data1;
@@ -20,12 +19,6 @@ static void Tails_Display_r(ObjectMaster* tsk)
 	TARGET_DYNAMIC(Tails_Display)(tsk);
 }
 
-void SuperTails_PerformLightingThing() {
-	if (isSuperTails)
-		Direct3D_PerformLighting(4);
-	else
-		Direct3D_PerformLighting(2);
-}
 
 // Sets the texture list to use when rendering.
 Sint32 __cdecl setSuperTailsTexture(NJS_TEXLIST* texlist)
@@ -382,6 +375,5 @@ void __cdecl SuperTails_Init(const char* path, const HelperFunctions& helperFunc
 	Invincibility_restart_t = new Trampoline((int)0x441F80, (int)0x441F85, InvincibilityRestart_r);
 
 	//Textures init
-	WriteCall((void*)0x460C71, SuperTails_PerformLightingThing);
 	WriteCall((void*)0x460CBC, setSuperTailsTexture);
 }
