@@ -148,6 +148,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="audio.cpp" />
+    <ClCompile Include="config.cpp" />
     <ClCompile Include="flickies.cpp" />
     <ClCompile Include="mod.cpp" />
     <ClCompile Include="physics.cpp" />

@@ -34,6 +34,7 @@ void initFlicky();
 void CheckSuperMusic_Restart(int playerID);
 void WaterHack_Init();
 void init_PhysicsHack();
+void initConfig(const char* path);
 
 enum SuperTailsMusic {
 

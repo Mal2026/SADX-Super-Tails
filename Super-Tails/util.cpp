@@ -1,7 +1,5 @@
 #include "stdafx.h"
 
-
-
 bool isTailsCurChar() {
 
 	EntityData1* P1 = EntityData1Ptrs[0];
@@ -84,7 +82,6 @@ NJS_VECTOR GetPlayerPoint(EntityData1* player) {
 
 	return GetPointToFollow(&player->Position, &dir, &player->Rotation);
 }
-
 
 HomingAttackTarget GetClosestAttack(NJS_VECTOR* pos) {
 	HomingAttackTarget target = { 0, 1000000.0f };

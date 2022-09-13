@@ -1,56 +1,24 @@
 #include "stdafx.h"
 
-int CurrentSuperMusic = Random;
-int CurrentSFX = SADX_SFX;
-bool AnimationTransfo = true;
-bool RemoveLimitations = false;
-bool AlwaysSuperMiles = false;
-bool superAura = true;
-bool customPhysics = true;
-bool textureChanges = true;
-
-Buttons TransformButton = Buttons_Y;
 HelperFunctions help;
-
-
-static const Buttons ButtonsList[]
-{
-	Buttons_B,
-	Buttons_Y,
-	Buttons_X,
-};
 
 extern "C" {
 
 	__declspec(dllexport) void __cdecl Init(const char* path, const HelperFunctions& helperFunctions)
 	{
-
-		if (helperFunctions.Version < 7)
+		if (helperFunctions.Version < 13)
 		{
 			MessageBox(WindowHandle,
-				L"Please update SADX Mod Loader. Super Tails mod requires API version 7 or newer.",
+				L"Please update SADX Mod Loader. Super Tails mod requires API version 13 or newer.",
 				L"Super Tails Error", MB_OK | MB_ICONERROR);
 		}
 
 		help = helperFunctions;
 
-		//Ini file configuration
-		const IniFile* config = new IniFile(std::string(path) + "\\config.ini");
-
-		textureChanges = config->getBool("General", "textureChanges", true);
-		TransformButton = ButtonsList[config->getInt("General", "TransformButton", 1)];
-		AnimationTransfo = config->getBool("General", "AnimationTransfo", true);
-		RemoveLimitations = config->getBool("General", "RemoveLimitations", false);
-		AlwaysSuperMiles = config->getBool("General", "AlwaysSuperMiles", false);
-		superAura = config->getBool("General", "superAura", true);
-		customPhysics = config->getBool("General", "customPhysics", true);
-
-		CurrentSuperMusic = config->getInt("Audio", "CurrentSuperMusic", Random);
-		CurrentSFX = config->getInt("Audio", "GetVoice", SADX_SFX);
-		delete config;
-
 		if (AlwaysSuperMiles)
 			RemoveLimitations = true;
+
+		initConfig(path);
 
 		SuperTails_Init(path, helperFunctions); //Main Code to Load Super Miles
 		Audio_Init(path, helperFunctions); //Everything related to music and sound
