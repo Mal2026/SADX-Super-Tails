@@ -22,7 +22,7 @@ struct ObjUnknownB
 HomingAttackTarget GetClosestAttack(NJS_VECTOR* pos);
 float GetDistance(NJS_VECTOR* orig, NJS_VECTOR* dest);
 void LookAt(NJS_VECTOR* from, NJS_VECTOR* to, Angle* outx, Angle* outy);
-void MoveForward(EntityData1* entity, float speed);
+void MoveForward(taskwk* entity, float speed);
 NJS_VECTOR GetPlayerPoint(EntityData1* player);
 NJS_VECTOR GetPointToFollow(NJS_VECTOR* pos, NJS_VECTOR* dir, Rotation3* rot);
 void LoadAnimationFile(AnimationFile** info, const char* name);

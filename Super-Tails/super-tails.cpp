@@ -3,27 +3,26 @@
 
 int ActualSong = 0;
 
-Trampoline* Tails_Main_t = nullptr;
-Trampoline* Tails_Display_t = nullptr;
-Trampoline* Invincibility_restart_t = nullptr;
+TaskHook Tails_Main_t(MilesTalesPrower);
+TaskHook Tails_Display_t(MilesDisplay);
+TaskHook Invincibility_restart_t((intptr_t)0x441F80);
 
 bool isDCCharUsed = false;
 bool isSuperTails = false;
 
-static void Tails_Display_r(ObjectMaster* tsk)
+static void Tails_Display_r(task* tsk)
 {
-	EntityData1* data = tsk->Data1;
+	auto data = tsk->twp;
 
-	isSuperTails = isPlayerOnSuperForm(data->CharIndex) == true ? 1 : 0;
+	isSuperTails = isPlayerOnSuperForm(pNum) == true ? 1 : 0;
 
-	TARGET_DYNAMIC(Tails_Display)(tsk);
+	Tails_Display_t.Original(tsk);
 }
 
 
 // Sets the texture list to use when rendering.
 Sint32 __cdecl setSuperTailsTexture(NJS_TEXLIST* texlist)
 {
-
 	if (isSuperTails && textureChanges) {
 
 		if (isDCCharUsed)
@@ -173,7 +172,7 @@ bool CheckPlayer_Input(unsigned char playerID) {
 }
 
 facewk* face = 0;
-uint8_t randomAngryFace = 0;
+
 void Miles_SetAngryFace(unsigned char playerID) {
 
 	if (!IsIngame() || EV_MainThread_ptr)
@@ -189,15 +188,12 @@ void Miles_SetAngryFace(unsigned char playerID) {
 	if (curchar != Characters_Tails)
 		return;
 
-	if (player->twp->mode == 1) {
-		randomAngryFace = 0;
-		return;
-	}
+
 
 	int faceaddress = (int)&player->twp->ewp->face;
-	faceaddress = faceaddress + 8; //Adjust address because this is 8 bytes off
+	faceaddress = faceaddress; //Adjust address because this is 8 bytes off
 	face = (facewk*)faceaddress;
-	int number = randomAngryFace + 13;
+	int number = 13;
 	face->old = number;
 	face->__new = number;
 	face->frame = 1;
@@ -299,27 +295,27 @@ void SuperMiles_Manager(ObjectMaster* obj) {
 }
 
 
-void Tails_Main_r(ObjectMaster* obj) {
+void Tails_Main_r(task* obj) {
 
-	EntityData1* data = obj->Data1;
+	auto data = obj->twp;
+	char pnum = pNum;
 
-	if (data->Action == 0) {
+	if (!data->mode) {
 		ObjectMaster* SuperMiles_ObjManager = LoadObject((LoadObj)2, 0, SuperMiles_Manager);
-		SuperMiles_ObjManager->Data1->CharIndex = data->CharIndex;
+		SuperMiles_ObjManager->Data1->CharIndex = pnum;
 	}
 
-	ObjectFunc(origin, Tails_Main_t->Target());
-	origin(obj);
+	Tails_Main_t.Original(obj);
 
-	CollisionInfo* collision_info = data->CollisionInfo;
-	if (collision_info)
+	auto col = data->cwp;
+	if (col)
 	{
-		CollisionData* collision_data = collision_info->CollisionArray;
-		if (CharObj2Ptrs[data->CharIndex]->Powerups & Powerups_Invincibility)
+		auto collision_data = col->info;
+		if (playerpwp[pnum]->item & Powerups_Invincibility)
 		{
-			//fix an issue where Invincibility doesn't make the character able to damage an enemy (in Vanilla this works for everyone but tails.)
+			//fix an issue where Invincibility doesn't make the character able to damage an enemy (in Vanilla, this works for everyone but tails.)
 			collision_data->damage = 3 & 3 | collision_data->damage & 0xF0 | (4 * (3 & 3));
-			data->CollisionInfo->CollisionArray = collision_data;
+			data->cwp->info = collision_data;
 		}
 	}
 
@@ -347,19 +343,19 @@ void __cdecl Init_SuperTailsTextures(const char* path, const HelperFunctions& he
 
 
 //fix character not invincibile in superform after a restart lol
-void InvincibilityRestart_r(ObjectMaster* obj)
+void InvincibilityRestart_r(task* obj)
 {
-	EntityData1* data = obj->Data1;
-	char pID = data->CharIndex;
+	auto data = obj->twp;
+	char pID = pNum;
 
-	if (CharObj2Ptrs[pID] && CharObj2Ptrs[pID]->Upgrades & Upgrades_SuperSonic)
+	if (playerpwp[pID] && playerpwp[pID]->equipment & Upgrades_SuperSonic)
 	{
-		CheckThingButThenDeleteObject(obj);
+		FreeTask(obj);
 		return;
 	}
 
-	ObjectFunc(origin, Invincibility_restart_t->Target());
-	origin(obj);
+
+	Invincibility_restart_t.Original(obj);
 }
 
 
@@ -367,12 +363,12 @@ void __cdecl SuperTails_Init(const char* path, const HelperFunctions& helperFunc
 {
 
 	Init_SuperTailsTextures(path, helperFunctions);
-	Tails_Main_t = new Trampoline((int)Tails_Main, (int)Tails_Main + 0x7, Tails_Main_r);
-	Tails_Display_t = new Trampoline((int)Tails_Display, (int)Tails_Display + 0x7, Tails_Display_r);
+	Tails_Main_t.Hook(Tails_Main_r);
+	Tails_Display_t.Hook(Tails_Display_r);
 
 	initFlicky();
 
-	Invincibility_restart_t = new Trampoline((int)0x441F80, (int)0x441F85, InvincibilityRestart_r);
+	Invincibility_restart_t.Hook(InvincibilityRestart_r);
 
 	//Textures init
 	WriteCall((void*)0x460CBC, setSuperTailsTexture);

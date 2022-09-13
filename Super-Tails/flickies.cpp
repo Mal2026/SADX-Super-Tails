@@ -1,14 +1,15 @@
 #include "stdafx.h"
 #include "flickies.h"
 
-ObjectMaster* flicky1;
-ObjectMaster* flicky2;
-ObjectMaster* flicky3;
-ObjectMaster* flicky4;
+task* flicky1 = nullptr;
+task* flicky2 = nullptr;
+task* flicky3 = nullptr;
+task* flicky4 = nullptr;
 
-ObjectMaster* flicky[4] = { flicky1, flicky2, flicky3, flicky4 };
-CollisionData flickyCol = { 0, 0, 0x70, 0xE2, 0x10, {0}, 5.0, 2.0, 0.0, 0.0, 0, 0, 0 };
+task* flicky[4] = { flicky1, flicky2, flicky3, flicky4 };
+CCL_INFO flickyCol = { 0, 0, 0x70, 0xE2, 0x10, {0}, 5.0, 2.0, 0.0, 0.0, 0, 0, 0 };
 
+static FunctionHook<int, EntityData1*, enemywk*> OhNoImDead2_t((intptr_t)OhNoImDead);
 int randFlicky = 0;
 
 float Flicky_GetFlightSpeed() {
@@ -20,148 +21,150 @@ float Flicky_GetAttackRange() {
 }
 
 int turnFlicky = 0;
-void TurnAndShift_EachFlicky(EntityData1* data1, EntityData1* player) {
+void TurnAndShift_EachFlicky(taskwk* data1, taskwk* player) {
 
-	data1->Position.x = njSin(turnFlicky) * 5.0f;
+	data1->pos.x = njSin(turnFlicky) * 5.0f;
 
-	if (data1->CharID > 0)
-		data1->Position.z = njCos(turnFlicky) * 5.0f + 4.0 * data1->CharID;
+	if (data1->counter.b[1] > 0)
+		data1->pos.z = njCos(turnFlicky) * 5.0f + 4.0 * data1->counter.b[1];
 	else
-		data1->Position.z = njCos(turnFlicky) * 5.0f;
+		data1->pos.z = njCos(turnFlicky) * 5.0f;
 
-	njAddVector(&data1->Position, &player->Position);
-	data1->Position.y = player->Position.y + 12.0;
+	njAddVector(&data1->pos, &player->pos);
+	data1->pos.y = player->pos.y + 12.0f;
 }
 
-void flicky_doRotation(EntityData1* data, EntityData1* player) {
+void flicky_doRotation(taskwk* data, taskwk* player) {
 
-	data->Rotation.y = BAMS_SubWrap(data->Rotation.y, 0x8000 - player->Rotation.y, 1024);
-	data->Rotation.x += 16;
-	data->Rotation.z += 1024;
+	data->ang.y = BAMS_SubWrap(data->ang.y, 0x8000 - player->ang.y, 1024);
+	data->ang.x += 16;
+	data->ang.z += 1024;
 }
 
-void flicky_TurnAround(EntityData1* data1, EntityData1* player) {
+void flicky_TurnAround(taskwk* data1, taskwk* player) {
 
 	flicky_doRotation(data1, player);
 
-	if (CharObj2Ptrs[player->CharIndex]->Speed.x + CharObj2Ptrs[player->CharIndex]->Speed.y < 0.2f) {
+	char pnum = player->counter.b[0];
+	if (CharObj2Ptrs[pnum]->Speed.x + CharObj2Ptrs[pnum]->Speed.y < 0.2f) {
 
 		turnFlicky += 100;
 		TurnAndShift_EachFlicky(data1, player);
 	}
 	else {
 		turnFlicky = 0;
-		data1->Action = flicky_followPlayer;
+		data1->mode = flicky_followPlayer;
 	}
 }
 
 
-void FollowPlayer(EntityData1* data, EntityData1* player, CharObj2* co2) {
+void FollowPlayer(taskwk* data, taskwk* player, playerwk* co2) {
 
 	flicky_doRotation(data, player);
 
 	NJS_VECTOR dest;
 
-	dest.x = njCos(data->Rotation.x) * 3.0f + player->Position.x;
-	dest.y = njSin(data->Rotation.z) + 12.0f + player->Position.y;
+	dest.x = njCos(data->ang.x) * 3.0f + player->pos.x;
+	dest.y = njSin(data->ang.z) + 12.0f + player->pos.y;
 
-	if (data->CharID > 0) {
-		dest.z = njSin(data->Rotation.x) * 3.0f + flicky[data->CharID - 1]->Data1->Position.z + 2.0f * data->CharID;
+	if (data->counter.b[1] > 0) {
+		dest.z = njSin(data->ang.x) * 3.0f + flicky[data->counter.b[1] - 1]->twp->pos.z + 2.0f * data->counter.b[1];
 	}
 	else {
-		dest.z = njSin(data->Rotation.x) * 3.0f + player->Position.z;
+		dest.z = njSin(data->ang.x) * 3.0f + player->pos.z;
 	}
 
-	float distance = sqrtf(powf(dest.x - data->Position.x, 2) + powf(dest.y - data->Position.y, 2) + powf(dest.z - data->Position.z, 2));
+	float distance = sqrtf(powf(dest.x - data->pos.x, 2) + powf(dest.y - data->pos.y, 2) + powf(dest.z - data->pos.z, 2));
 
 	if (distance >= 100.0f) {
-		data->Position.x = dest.x;
-		data->Position.y = dest.y;
-		data->Position.z = dest.z;
+		data->pos.x = dest.x;
+		data->pos.y = dest.y;
+		data->pos.z = dest.z;
 	}
 	else
 	{
-		data->Position.x = (dest.x - data->Position.x) * 0.25f + data->Position.x;
-		data->Position.y = (dest.y - data->Position.y) * 0.25f + data->Position.y;
-		data->Position.z = (dest.z - data->Position.z) * 0.25f + data->Position.z;
+		data->pos.x = (dest.x - data->pos.x) * 0.25f + data->pos.x;
+		data->pos.y = (dest.y - data->pos.y) * 0.25f + data->pos.y;
+		data->pos.z = (dest.z - data->pos.z) * 0.25f + data->pos.z;
 	}
 
-	if (co2->Speed.x + co2->Speed.y < 0.2f) {
-		data->Position = player->Position;
-		data->Action = flicky_turnAround;
+	if (co2->spd.x + co2->spd.y < 0.2f) {
+		data->pos = player->pos;
+		data->mode = flicky_turnAround;
 		return;
 	}
 }
 
-void Flicky_Delete(ObjectMaster* obj) {
+void Flicky_Delete(task* obj) {
 	for (int i = 0; i < LengthOfArray(flicky); i++) {
 		if (flicky[i]) {
-			CheckThingButThenDeleteObject(flicky[i]);
+			FreeTask(flicky[i]);
 			flicky[i] = nullptr;
 		}
 	}
 }
 
-void CheckForAttack(EntityData1* data) {
-	HomingAttackTarget target = GetClosestAttack(&data->Position);
+void CheckForAttack(taskwk* data) {
+	HomingAttackTarget target = GetClosestAttack(&data->pos);
 
 	if (target.entity && target.distance < Flicky_GetAttackRange()) {
 		randFlicky = rand() % 4; //unused for now
-		data->InvulnerableTime = 0;
-		data->Action = flicky_attack;
+		data->wtimer = 0;
+		data->mode = flicky_attack;
 	}
 
 }
 
-void FlickyAttack(ObjectMaster* obj) {
+void FlickyAttack(task* obj) {
 
-	EntityData1* data1 = obj->Data1;
-	HomingAttackTarget target = GetClosestAttack(&data1->Position);
+	taskwk* data1 = obj->twp;
+	HomingAttackTarget target = GetClosestAttack(&data1->pos);
 
-	if (data1->Status & StatusFlicky_Attacked) {
+	if (data1->flag & StatusFlicky_Attacked) {
 		if (rand() % (500 / max(1, min(50, 99))) == 0) {
-			data1->Status &= ~(StatusFlicky_Attacked);
+			data1->flag &= ~(StatusFlicky_Attacked);
 		}
 		else {
-			data1->Action = flicky_followPlayer;
-			data1->Status &= ~(StatusFlicky_Attacked);
+			data1->mode = flicky_followPlayer;
+			data1->flag &= ~(StatusFlicky_Attacked);
 			return;
 		}
 	}
 
 	if (target.entity && target.distance < Flicky_GetAttackRange()) {
-		float dist = GetDistance(&data1->Position, &target.entity->Position) + 30.0f;
-		LookAt(&data1->Position, &target.entity->Position, &data1->Rotation.x, &data1->Rotation.y);
+		float dist = GetDistance(&data1->pos, &target.entity->Position) + 30.0f;
+		LookAt(&data1->pos, &target.entity->Position, &data1->ang.x, &data1->ang.y);
 		MoveForward(data1, Flicky_GetFlightSpeed());
-		data1->Rotation.x = 0;
+		data1->ang.x = 0;
 
 		if (dist < 50.0f) {
-			data1->CollisionInfo->CollisionArray[0].attr &= 0xFFFFFFEF;
-			data1->CollisionInfo->CollisionArray[0].damage |= 3u;
+			data1->cwp->info[0].attr &= 0xFFFFFFEF;
+			data1->cwp->info[0].damage |= 3u;
 
-			if (++data1->InvulnerableTime == 120) { //failsafe to prevent softlock
-				data1->CollisionInfo->CollisionArray[0].attr |= 0x400u;
-				data1->CollisionInfo->CollisionArray[0].damage &= 0xFCu;
-				data1->Action = flicky_followPlayer;
-				data1->Status &= ~(StatusFlicky_Attacked);
+			if (++data1->wtimer == 120) { //failsafe to prevent softlock
+				data1->cwp->info[0].attr |= 0x400u;
+				data1->cwp->info[0].damage &= 0xFCu;
+				data1->mode = flicky_followPlayer;
+				data1->flag &= ~(StatusFlicky_Attacked);
 
 			}
 		}
 		else {
-			data1->CollisionInfo->CollisionArray[0].attr |= 0x400u;
-			data1->CollisionInfo->CollisionArray[0].damage &= 0xFCu;
+			data1->cwp->info[0].attr |= 0x400u;
+			data1->cwp->info[0].damage &= 0xFCu;
 		}
 	}
 	else {
-		data1->Action = flicky_followPlayer;
-		data1->Status &= ~(StatusFlicky_Attacked);
+		data1->mode = flicky_followPlayer;
+		data1->flag &= ~(StatusFlicky_Attacked);
 	}
 }
 
 extern NJS_TEXLIST Flicky_TEXLIST;
-void __cdecl Flicky_Display(ObjectMaster* obj) {
-	EntityData1* data = obj->Data1;
-	EntityData1 shadow;
+void __cdecl Flicky_Display(task* obj) {
+
+	auto data = obj->twp;
+	taskwk shadow;
 
 	if (MissedFrames)
 		return;
@@ -171,71 +174,71 @@ void __cdecl Flicky_Display(ObjectMaster* obj) {
 	Direct3D_PerformLighting(2);
 
 	njPushMatrixEx();
-	njTranslateV(0, &data->Position);
-	njRotateY(0, data->Rotation.y);
-	NJS_ACTION Action = { obj->Data1->Object, WingAnim.motion };
+	njTranslateV(0, &data->pos);
+	njRotateY(0, data->ang.y);
+	NJS_ACTION Action = { &Wing_Model, WingAnim.motion };
 	njAction_Queue(&Action, FrameCounterUnpaused % WingAnim.motion->nbFrame, QueuedModelFlagsB_EnableZWrite);
 	njPopMatrixEx();
 
 	ClampGlobalColorThing_Thing();
 	Direct3D_PerformLighting(0);
 
-	shadow.Position = data->Position;
-	shadow.Rotation = data->Rotation;
-	shadow.Rotation.y = -data->Rotation.y;
-	DrawShadow(&shadow, 0.40000001);
+	shadow.pos = data->pos;
+	shadow.ang = data->ang;
+	shadow.ang.y = -data->ang.y;
+	DrawShadow((EntityData1*)&shadow, 0.40000001f);
 }
 
-void __cdecl Flicky_Main(ObjectMaster* obj) {
-	EntityData1* data = obj->Data1;
-	EntityData1* player = EntityData1Ptrs[data->CharIndex];
-	CharObj2* co2 = CharObj2Ptrs[data->CharIndex];
+void __cdecl Flicky_Main(task* obj) {
+	auto data = obj->twp;
+	auto player = playertwp[pNum];
+	auto co2 = playerpwp[pNum];
 
 	if (!player || !isSuperTails) {
-		DeleteObject_(obj);
+		FreeTask(obj);
 		return;
 	}
 
-	switch (data->Action) {
+	switch (data->mode) {
 	case flicky_turnAround:
 		flicky_TurnAround(data, player);
 		CheckForAttack(data);
-		data->CollisionInfo->CollisionArray[0].damage = 0;
+		data->cwp->info[0].damage = 0;
 		break;
 	case flicky_followPlayer:
 		FollowPlayer(data, player, co2);
 		CheckForAttack(data);
-		data->CollisionInfo->CollisionArray[0].damage = 0;
+		data->cwp->info[0].damage = 0;
 		break;
 	case flicky_attack:
 		FlickyAttack(obj);
-		AddToCollisionList(data);
+		EntryColliList(data);
 		break;
 	}
 
-	obj->DisplaySub(obj);
+	obj->disp(obj);
 }
 
-void __cdecl Load_Miles_Flickies(ObjectMaster* obj) {
-	EntityData1* data = obj->Data1;
-	EntityData1* player = EntityData1Ptrs[data->CharIndex];
+void __cdecl Load_Miles_Flickies(task* obj) {
+	auto data = obj->twp;
+	auto player = EntityData1Ptrs[pNum];
 
 	if (!player) {
-		DeleteObject_(obj);
+		FreeTask(obj);
 		return;
 	}
 
-	data->Position = player->Position;
+	data->pos = player->Position;
 
-	if (data->CharID == 0)
-		data->Position.y = data->Position.y + 12.0;
+	if (data->counter.b[1] == 0)
+		data->pos.y = data->pos.y + 12.0;
 
-	data->Rotation.y = 0x8000 - player->Rotation.y;
-	data->Object = &Wing_Model;
-	Collision_Init(obj, &flickyCol, 1, 4u);
-	obj->DisplaySub = Flicky_Display;
-	obj->MainSub = Flicky_Main;
-	obj->DeleteSub = Flicky_Delete;
+	data->ang.y = 0x8000 - player->Rotation.y;
+	data->timer.ptr = &Wing_Model;
+	CCL_Init(obj, &flickyCol, 1, 4u);
+	obj->disp = Flicky_Display;
+	obj->exec = Flicky_Main;
+	obj->dest = Flicky_Delete;
 }
 
 void Call_Flickies(unsigned char player) {
@@ -245,39 +248,39 @@ void Call_Flickies(unsigned char player) {
 		if (flicky[i]) //if flicky already exist, skip.
 			continue;
 
-		flicky[i] = LoadObject(LoadObj_Data1, 3, Load_Miles_Flickies);
-		flicky[i]->Data1->CharIndex = player;
-		flicky[i]->Data1->CharID = i;
+		flicky[i] = CreateElementalTask(LoadObj_Data1, 3, Load_Miles_Flickies);
+		flicky[i]->twp->counter.b[0] = player;
+		flicky[i]->twp->counter.b[1] = i;
 	}
 
 	return;
 }
 
-Trampoline* OhNoImDead2_t;
 
-bool OhNoImDead2_r(EntityData1* a1, ObjectData2* a2) {
+
+int OhNoImDead2_r(EntityData1* a1, enemywk* a2) {
 
 	if (isSuperTails) {
 
 		if (a1 && a1->CollisionInfo && a1->CollisionInfo->CollidingObject && a1->CollisionInfo->CollidingObject->Object) {
 
-			if (a1->CollisionInfo->CollidingObject->Object->MainSub == Flicky_Main) {
+			if (a1->CollisionInfo->CollidingObject->Object->MainSub == (ObjectFuncPtr)Flicky_Main) {
 
 				EntityData1* data = a1->CollisionInfo->CollidingObject->Object->Data1;
 
 				if (data->CollisionInfo->Object->MainSub != OParasol_Main) {
 					data->Status |= StatusFlicky_Attacked;
-					return true;
+					return 1;
 				}
 			}
 
 		}
 	}
 
-	return TARGET_DYNAMIC(OhNoImDead2)(a1, a2);
+	return OhNoImDead2_t.Original(a1, a2);
 }
 
 void initFlicky() {
-	OhNoImDead2_t = new Trampoline(0x4CE030, 0x4CE036, OhNoImDead2_r);
+	OhNoImDead2_t.Hook(OhNoImDead2_r);
 	return;
 }

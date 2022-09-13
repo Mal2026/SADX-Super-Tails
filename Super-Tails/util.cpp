@@ -35,13 +35,13 @@ float GetDistance(NJS_VECTOR* orig, NJS_VECTOR* dest) {
 }
 
 
-void MoveForward(EntityData1* entity, float speed) {
+void MoveForward(taskwk* entity, float speed) {
 	njPushMatrix(_nj_unit_matrix_);
-	njTranslateEx(&entity->Position);
-	njRotateY(0, entity->Rotation.y);
-	njRotateX(0, entity->Rotation.x);
+	njTranslateEx(&entity->pos);
+	njRotateY(0, entity->ang.y);
+	njRotateX(0, entity->ang.x);
 	njTranslate(0, 0, 0, speed);
-	njGetTranslation(0, &entity->Position);
+	njGetTranslation(0, &entity->pos);
 	njPopMatrix(1u);
 }
 

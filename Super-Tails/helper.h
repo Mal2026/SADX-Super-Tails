@@ -15,6 +15,9 @@ extern Buttons TransformButton;
 
 extern HelperFunctions help;
 
+#define TaskHook static FunctionHook<void, task*>
+#define pNum data->counter.b[0]
+
 ObjectFunc(UpdateSetDataAndDelete, 0x46C150);
 VoidFunc(FUN_00412ad0, 0x412ad0);
 ObjectFunc(EV_ClrFace, 0x4310F0);
