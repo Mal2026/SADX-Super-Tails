@@ -211,15 +211,21 @@ void SuperMiles_Manager(ObjectMaster* obj) {
 	EntityData1* data = obj->Data1;
 	EntityData1* player = EntityData1Ptrs[obj->Data1->CharIndex];
 
+
 	if (!player || !IsIngame() || EV_MainThread_ptr)
 		return;
 
-	if (player->CharID != Characters_Tails) //charsel fix
+	CharObj2* co2 = CharObj2Ptrs[player->CharIndex];
+
+	if (player->CharID != Characters_Tails || !co2) { //charsel fix
 		CheckThingButThenDeleteObject(obj);
+		return;
+	}
 
 	unsigned char playerID = data->CharIndex;
-	CharObj2* co2 = CharObj2Ptrs[player->CharIndex];
+
 	int timer = 30;
+
 
 	switch (data->Action) {
 
