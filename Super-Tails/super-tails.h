@@ -10,7 +10,7 @@ enum SuperTailsM {
 	superTailsUntransfo,
 };
 
-
+NJS_TEXNAME Miles_LifeIconTex[1];
 NJS_TEXNAME SUPERMILES_DC[25];
 NJS_TEXNAME SUPERMILES_DX[16];
 
@@ -21,22 +21,27 @@ NJS_TEXNAME Flicky_Tex[7];
 
 NJS_TEXLIST Flicky_TEXLIST = { arrayptrandlength(Flicky_Tex) };
 
+NJS_TEXLIST SuperMilesLifeIcon_Textlist = { arrayptrandlength(Miles_LifeIconTex) };
+
 PVMEntry superTails_DCEntry[] = {
 	{"SUPERMILES_DC", &SuperMilesDC_TEXLIST},
 	{"flickyTex", &Flicky_TEXLIST  },
 	{"SUPERSONIC", &SUPERSONIC_TEXLIST},
+	{"MilesLifeIcon", &SuperMilesLifeIcon_Textlist}
 };
 
 PVMEntry superTails_DXEntry[] = {
 	{"SUPERMILES_DX", &SuperMilesDX_TEXLIST},
 	{"flickyTex", &Flicky_TEXLIST  },
 	{"SUPERSONIC", &SUPERSONIC_TEXLIST},
+	{"MilesLifeIcon", &SuperMilesLifeIcon_Textlist}
 };
 
 //if player set "no textures changes"
 PVMEntry superTails_Entry[] = {
 	{"flickyTex", &Flicky_TEXLIST  },
 	{"SUPERSONIC", &SUPERSONIC_TEXLIST},
+	{"MilesLifeIcon", &SuperMilesLifeIcon_Textlist},
 };
 
 void Load_SuperPhysics(taskwk* data1);

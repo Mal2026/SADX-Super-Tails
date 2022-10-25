@@ -153,6 +153,7 @@
     <ClCompile Include="audio.cpp" />
     <ClCompile Include="config.cpp" />
     <ClCompile Include="flickies.cpp" />
+    <ClCompile Include="hud.cpp" />
     <ClCompile Include="mod.cpp" />
     <ClCompile Include="physics.cpp" />
     <ClCompile Include="stdafx.cpp" />

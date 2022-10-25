@@ -3,6 +3,7 @@
 HelperFunctions help;
 
 bool MultiModEnabled = false;
+bool isDCConv = false;
 
 extern "C" {
 
@@ -28,14 +29,14 @@ extern "C" {
 		init_PhysicsHack();
 
 		MultiModEnabled = GetModuleHandle(L"sadx-multiplayer") != nullptr;
+		isDCConv = GetModuleHandle(L"DCMods_Main") != NULL;
 	}
 
 
 	__declspec(dllexport) void __cdecl OnFrame()
 	{
 
-		//SetDebugFontSize(13.0f * (unsigned short)VerticalResolution / 480.0f);
-		//DisplayDebugStringFormatted(NJM_LOCATION(2, 1), "Current bird: %d", birdCount);
+		DisplaySuperMiles_Icon();
 	}
 
 	__declspec(dllexport) ModInfo SADXModInfo = { ModLoaderVer };

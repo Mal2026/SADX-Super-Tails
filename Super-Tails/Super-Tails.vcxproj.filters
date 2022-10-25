@@ -48,6 +48,9 @@
     <ClCompile Include="water-hack.cpp">
       <Filter>Source Files\abilities</Filter>
     </ClCompile>
+    <ClCompile Include="hud.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">

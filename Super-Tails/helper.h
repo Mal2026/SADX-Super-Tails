@@ -12,6 +12,9 @@ extern bool customPhysics;
 extern int charType;
 extern Buttons TransformButton;
 extern bool MultiModEnabled;
+extern bool lifeIcon;
+
+extern bool isDCConv;
 
 extern HelperFunctions help;
 
@@ -38,6 +41,7 @@ void initFlicky();
 void CheckSuperMusic_Restart(int playerID);
 void WaterHack_Init();
 void init_PhysicsHack();
+void __cdecl DisplaySuperMiles_Icon();
 void initConfig(const char* path);
 
 enum SuperTailsMusic {

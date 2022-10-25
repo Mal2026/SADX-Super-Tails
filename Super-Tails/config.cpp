@@ -8,6 +8,7 @@ bool AlwaysSuperMiles = false;
 bool superAura = true;
 bool customPhysics = true;
 int charType = Dreamcast;
+bool lifeIcon = true;
 
 Buttons TransformButton = Buttons_Y;
 
@@ -30,6 +31,7 @@ void initConfig(const char* path)
 	AlwaysSuperMiles = config->getBool("General", "AlwaysSuperMiles", false);
 	superAura = config->getBool("General", "superAura", true);
 	customPhysics = config->getBool("General", "customPhysics", true);
+	lifeIcon = config->getBool("General", "lifeIcon", true);
 
 	CurrentSuperMusic = config->getInt("Audio", "CurrentSuperMusic", Random);
 	CurrentSFX = config->getInt("Audio", "GetVoice", SADX_SFX);
