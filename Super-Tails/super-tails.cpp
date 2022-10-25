@@ -8,6 +8,8 @@ TaskHook Tails_Display_t(MilesDisplay);
 TaskHook Invincibility_restart_t((intptr_t)0x441F80);
 
 bool isSuperTails = false;
+static task* flashPtr = nullptr;
+bool longTransfomDone = false;
 
 static void Miles_Display_r(task* tsk)
 {
@@ -111,7 +113,6 @@ void Load_SuperAura(taskwk* data1) {
 
 void SetSuperMiles(CharObj2* co2, EntityData1* data1) {
 
-
 	taskwk* taskw = (taskwk*)data1;
 
 	if (IsIngame() && CurrentSFX != None && !isPerfectChasoLevel() && !isTailsAI(data1))
@@ -210,10 +211,38 @@ void Miles_SetAngryFace(unsigned char playerID) {
 	face->nbFrame = 90000;
 }
 
+void Delete_FlashTransfo()
+{
+	if (!AlwaysSuperMiles)
+	{
+		crushLightOff();
+
+		if (flashPtr) {
+			FreeTask(flashPtr);
+			flashPtr = nullptr;
+		}
+
+		longTransfomDone = true;
+	}
+}
+
+void SetEffectTransformation(taskwk* data)
+{
+	if (!AlwaysSuperMiles && IsIngame() && AnimationTransfo)
+	{
+		crushLightOn(
+			data->pos.x,
+			data->pos.y + 5.0f,
+			data->pos.z,
+			3, 10, 0.40000001f, 2.0f, 0xFFFFFFFF, 0x96969696);
+	}
+}
+
 void SuperTailsDelete(ObjectMaster* obj) {
 
 	unSuper(obj->Data1->CharIndex);
 	MusicList[MusicIDs_sprsonic].Name = "sprsonic";
+	flashPtr = nullptr;
 }
 
 void SuperMiles_Manager(ObjectMaster* obj) {
@@ -225,7 +254,6 @@ void SuperMiles_Manager(ObjectMaster* obj) {
 
 	if (!player || !IsIngame() || EV_MainThread_ptr)
 		return;
-
 
 	CharObj2* co2 = CharObj2Ptrs[player->CharIndex];
 
@@ -258,6 +286,8 @@ void SuperMiles_Manager(ObjectMaster* obj) {
 		data->Index = 0;
 		player->Status = 0;
 		co2->Powerups |= Powerups_Invincibility;
+
+		SetEffectTransformation((taskwk*)player);
 		SuperMiles_PlayTransfoAnimation(player);
 
 		data->Action++;
@@ -266,11 +296,21 @@ void SuperMiles_Manager(ObjectMaster* obj) {
 
 		if (AlwaysSuperMiles)
 			timer = 10;
+		else if (!longTransfomDone)
+			timer = 40;
 
-		if (++data->Index == timer)
+		++data->Index;
+
+		if (data->Index == timer)
 		{
+			Delete_FlashTransfo();
 			data->Action++;
 		}
+		else if (AnimationTransfo && !longTransfomDone && data->Index == timer - 30)
+		{
+			flashPtr = COverlayCreate(0.039999999f, 0.1f, 1.0f, 1.0f, 1.0f);
+		}
+
 		break;
 	case superTailsTransfo:
 
