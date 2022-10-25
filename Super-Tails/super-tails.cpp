@@ -9,7 +9,7 @@ TaskHook Invincibility_restart_t((intptr_t)0x441F80);
 
 bool isSuperTails = false;
 
-static void Tails_Display_r(task* tsk)
+static void Miles_Display_r(task* tsk)
 {
 	auto data = tsk->twp;
 
@@ -18,15 +18,25 @@ static void Tails_Display_r(task* tsk)
 	Tails_Display_t.Original(tsk);
 }
 
+NJS_TEXLIST* getSuperTailsTex()
+{
+	switch (charType)
+	{
+	case Dreamcast:
+		return &SuperMilesDC_TEXLIST;
+	case DX:
+		return &SuperMilesDX_TEXLIST;
+	case none:
+	default:
+		return &MILES_TEXLIST;
+	}
+}
+
 // Sets the texture list to use when rendering.
 Sint32 __cdecl setSuperTailsTexture(NJS_TEXLIST* texlist)
 {
 	if (isSuperTails && charType != none) {
-
-		if (charType == Dreamcast)
-			texlist = &SuperMilesDC_TEXLIST;
-		else
-			texlist = &SuperMilesDX_TEXLIST;
+		texlist = getSuperTailsTex();
 	}
 
 	return njSetTexture(texlist);
@@ -71,7 +81,7 @@ void unSuper(unsigned char pnum) {
 	EV_ClrFace(player);
 	ForcePlayerAction(0, 24);
 
-	if (IsIngame())
+	if (IsIngame() && !pnum)
 	{
 		if (CurrentSFX == DBZ_SFX)
 			PlayVoice(7002);
@@ -104,7 +114,7 @@ void SetSuperMiles(CharObj2* co2, EntityData1* data1) {
 
 	taskwk* taskw = (taskwk*)data1;
 
-	if (IsIngame() && CurrentSFX != None && !isPerfectChasoLevel())
+	if (IsIngame() && CurrentSFX != None && !isPerfectChasoLevel() && !isTailsAI(data1))
 		PlayVoice(7001);
 
 	co2->Upgrades |= Upgrades_SuperSonic;
@@ -209,11 +219,13 @@ void SuperTailsDelete(ObjectMaster* obj) {
 void SuperMiles_Manager(ObjectMaster* obj) {
 
 	EntityData1* data = obj->Data1;
-	EntityData1* player = EntityData1Ptrs[obj->Data1->CharIndex];
+	auto pnum = obj->Data1->CharIndex;
+	EntityData1* player = EntityData1Ptrs[pnum];
 
 
 	if (!player || !IsIngame() || EV_MainThread_ptr)
 		return;
+
 
 	CharObj2* co2 = CharObj2Ptrs[player->CharIndex];
 
@@ -264,7 +276,7 @@ void SuperMiles_Manager(ObjectMaster* obj) {
 
 		SetSuperMiles(co2, player);
 
-		if (!isTailsAI(player)) {
+		if (!isTailsAI(player) && !pnum) {
 			if (CurrentSuperMusic != None && CurrentSong != MusicIDs_sprsonic)
 			{
 				ActualSong = LastSong;
@@ -284,11 +296,12 @@ void SuperMiles_Manager(ObjectMaster* obj) {
 
 				data->Action = playerInputCheck;
 			}
-			CheckSuperMusic_Restart(playerID);
+			CheckSuperMusic_Restart(0);
 		}
 
 		co2->TailsFlightTime = 0.0f;
 		Miles_SetAngryFace(playerID);
+		CheckMilesAfterImages(player, co2);
 		break;
 	case superTailsUntransfo:
 		unSuper(playerID);
@@ -369,7 +382,7 @@ void __cdecl SuperTails_Init(const char* path, const HelperFunctions& helperFunc
 {
 	Init_SuperTailsTextures(path, helperFunctions);
 	Tails_Main_t.Hook(Tails_Main_r);
-	Tails_Display_t.Hook(Tails_Display_r);
+	Tails_Display_t.Hook(Miles_Display_r);
 
 	initFlicky();
 

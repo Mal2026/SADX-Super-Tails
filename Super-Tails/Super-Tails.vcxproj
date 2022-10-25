@@ -147,6 +147,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="afterimage.cpp" />
     <ClCompile Include="audio.cpp" />
     <ClCompile Include="config.cpp" />
     <ClCompile Include="flickies.cpp" />

@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\abilities">
+      <UniqueIdentifier>{35296d52-7085-4a6c-b272-83053a4d3975}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="mod.cpp">
@@ -24,9 +27,6 @@
     <ClCompile Include="audio.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="flickies.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="super-tails.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -36,11 +36,17 @@
     <ClCompile Include="physics.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="water-hack.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="config.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="afterimage.cpp">
+      <Filter>Source Files\abilities</Filter>
+    </ClCompile>
+    <ClCompile Include="flickies.cpp">
+      <Filter>Source Files\abilities</Filter>
+    </ClCompile>
+    <ClCompile Include="water-hack.cpp">
+      <Filter>Source Files\abilities</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -27,3 +27,7 @@ NJS_VECTOR GetPlayerPoint(EntityData1* player);
 NJS_VECTOR GetPointToFollow(NJS_VECTOR* pos, NJS_VECTOR* dir, Rotation3* rot);
 void LoadAnimationFile(AnimationFile** info, const char* name);
 bool isPerfectChasoLevel();
+void njRotateX_(Angle x);
+void njRotateY_(Angle y);
+void njRotateZ_(Angle z);
+NJS_TEXLIST* getSuperTailsTex();

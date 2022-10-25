@@ -40,3 +40,4 @@ PVMEntry superTails_Entry[] = {
 };
 
 void Load_SuperPhysics(taskwk* data1);
+void CheckMilesAfterImages(EntityData1* data, CharObj2* co2);
