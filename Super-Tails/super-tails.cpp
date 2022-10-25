@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "super-tails.h"
+#include "multiapi.h"
 
 int ActualSong = 0;
 
@@ -228,6 +229,9 @@ void Delete_FlashTransfo()
 
 void SetEffectTransformation(taskwk* data)
 {
+	if (MultiModEnabled && multi_is_active())
+		return;
+
 	if (!AlwaysSuperMiles && IsIngame() && AnimationTransfo)
 	{
 		crushLightOn(
@@ -296,6 +300,8 @@ void SuperMiles_Manager(ObjectMaster* obj) {
 
 		if (AlwaysSuperMiles)
 			timer = 10;
+		else if (MultiModEnabled && multi_is_active())
+			timer = 35;
 		else if (!longTransfomDone)
 			timer = 40;
 
@@ -308,6 +314,9 @@ void SuperMiles_Manager(ObjectMaster* obj) {
 		}
 		else if (AnimationTransfo && !longTransfomDone && data->Index == timer - 30)
 		{
+			if (MultiModEnabled && multi_is_active())
+				return;
+
 			flashPtr = COverlayCreate(0.039999999f, 0.1f, 1.0f, 1.0f, 1.0f);
 		}
 

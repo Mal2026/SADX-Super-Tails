@@ -11,6 +11,7 @@ extern bool superAura;
 extern bool customPhysics;
 extern int charType;
 extern Buttons TransformButton;
+extern bool MultiModEnabled;
 
 extern HelperFunctions help;
 

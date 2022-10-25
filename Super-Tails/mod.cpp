@@ -2,6 +2,8 @@
 
 HelperFunctions help;
 
+bool MultiModEnabled = false;
+
 extern "C" {
 
 	__declspec(dllexport) void __cdecl Init(const char* path, const HelperFunctions& helperFunctions)
@@ -24,6 +26,8 @@ extern "C" {
 		Audio_Init(path, helperFunctions); //Everything related to music and sound
 		WaterHack_Init(); // Hack to allow the player to float on water when using Super Form.
 		init_PhysicsHack();
+
+		MultiModEnabled = GetModuleHandle(L"sadx-multiplayer") != nullptr;
 	}
 
 
