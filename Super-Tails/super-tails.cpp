@@ -90,10 +90,11 @@ void unSuper(unsigned char pnum) {
 			PlayVoice(7002);
 
 		RestoreMusic();
-
-		co2->Upgrades &= ~Upgrades_SuperSonic;
-		co2->Powerups &= ~Powerups_Invincibility;
 	}
+
+	co2->Upgrades &= ~Upgrades_SuperSonic;
+	co2->Powerups &= ~Powerups_Invincibility;
+
 
 	return;
 }
@@ -147,14 +148,12 @@ bool CheckUntransform_Input(unsigned char playerID) {
 		return false;
 
 	if (isTailsAI(player) && !isPlayerOnSuperForm(0)) {
-		unSuper(player->CharIndex);
 		return true;
 	}
 
 	if (ControllerPointers[playerID]->PressedButtons & TransformButton)
 	{
 		if (player->Action == Flying || player->Action == Jumping) {
-			unSuper(player->CharIndex);
 			return true;
 		}
 	}
@@ -314,7 +313,7 @@ void SuperMiles_Manager(ObjectMaster* obj) {
 		}
 		else if (AnimationTransfo && !longTransfomDone && data->Index == timer - 30)
 		{
-			if (MultiModEnabled && multi_is_active())
+			if (MultiModEnabled && multi_is_active() || isTailsAI((EntityData1*)player))
 				return;
 
 			flashPtr = COverlayCreate(0.039999999f, 0.1f, 1.0f, 1.0f, 1.0f);
@@ -343,7 +342,8 @@ void SuperMiles_Manager(ObjectMaster* obj) {
 
 			if (CheckUntransform_Input(playerID)) {
 
-				data->Action = playerInputCheck;
+				data->Action = superTailsUntransfo;
+				break;
 			}
 			CheckSuperMusic_Restart(0);
 		}
