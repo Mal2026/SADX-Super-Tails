@@ -231,7 +231,7 @@ void SetEffectTransformation(taskwk* data)
 	if (MultiModEnabled && multi_is_active())
 		return;
 
-	if (!AlwaysSuperMiles && IsIngame() && AnimationTransfo)
+	if (!AlwaysSuperMiles && IsIngame() && AnimationTransfo && !isTailsAI((EntityData1*)data))
 	{
 		crushLightOn(
 			data->pos.x,

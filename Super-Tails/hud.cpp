@@ -13,7 +13,7 @@ bool isInActionStage()
 
 void __cdecl DisplaySuperMiles_Icon()
 {
-	if (!lifeIcon || !IsIngame() || !EntityData1Ptrs[0] || EntityData1Ptrs[0]->CharID != Characters_Tails || !isSuperTails || !isInActionStage())
+	if (!lifeIcon || !IsIngame() && GameState != 16 || !playertwp[0] || playertwp[0]->counter.b[1] != Characters_Tails || !isSuperTails || !isInActionStage())
 		return;
 
 	help.PushScaleUI(uiscale::Align_Automatic, false, 1.0f, 1.0f);
@@ -26,12 +26,12 @@ void __cdecl DisplaySuperMiles_Icon()
 	{
 		SUPERMILES_EXTRA_SPRITE.p.x = 16.0f;
 
-		if (isDCConv)
+		if (isDCConv && !hudPlus)
 			SUPERMILES_EXTRA_SPRITE.p.y = VerticalStretch * 480.0f - 80.0f;
 		else
 			SUPERMILES_EXTRA_SPRITE.p.y = VerticalStretch * 480.0f - 64.0f;
 
-		njDrawSprite2D_ForcePriority(&SUPERMILES_EXTRA_SPRITE, 0, -1.501, NJD_SPRITE_ALPHA);
+		njDrawSprite2D_ForcePriority(&SUPERMILES_EXTRA_SPRITE, 0, -1.501f, NJD_SPRITE_ALPHA);
 		ClampGlobalColorThing_Thing();
 	}
 

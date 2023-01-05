@@ -15,6 +15,7 @@ extern bool MultiModEnabled;
 extern bool lifeIcon;
 
 extern bool isDCConv;
+extern bool hudPlus;
 
 extern HelperFunctions help;
 
@@ -23,11 +24,7 @@ extern HelperFunctions help;
 
 ObjectFunc(UpdateSetDataAndDelete, 0x46C150);
 VoidFunc(FUN_00412ad0, 0x412ad0);
-TaskFunc(EV_ClrFace, 0x4310F0);
-VoidFunc(crushLightOff, 0x6ED9A0);
-FunctionPointer(void, crushLightOn, (float pos_x, float pos_y, float pos_z, int crushLightNum, int life,
-	float start_width, float end_width, unsigned int start_col, unsigned int end_col), 0x6EDA20);
-FunctionPointer(task*, COverlayCreate, (float s, float a, float r, float g, float b), 0x6EF480);
+
 
 void __cdecl Audio_Init(const char* path, const HelperFunctions& helperFunctions);
 void __cdecl SuperTails_Init(const char* path, const HelperFunctions& helperFunctions);

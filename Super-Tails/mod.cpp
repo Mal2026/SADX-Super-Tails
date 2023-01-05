@@ -4,6 +4,7 @@ HelperFunctions help;
 
 bool MultiModEnabled = false;
 bool isDCConv = false;
+bool hudPlus = false;
 
 extern "C" {
 
@@ -30,6 +31,7 @@ extern "C" {
 
 		MultiModEnabled = GetModuleHandle(L"sadx-multiplayer") != nullptr;
 		isDCConv = GetModuleHandle(L"DCMods_Main") != NULL;
+		hudPlus = GetModuleHandleW(L"sadx-hud-plus") != nullptr;
 	}
 
 
